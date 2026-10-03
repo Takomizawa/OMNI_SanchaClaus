@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ground Station</title>
+<link rel="stylesheet" href="style.css">
+<script>
+window.addEventListener('error', function(e) {
+  alert('Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  alert('Unhandled Rejection: ' + e.reason);
+});
+</script>
+</head>
+<body>
+
+<header>
+  <span class="hdr-title" style="letter-spacing:1px;">GROUND STATION <span style="font-size:11px;color:var(--muted);font-weight:normal;">by Sancha-Claus Tech</span></span>
+  <div class="hdr-sep"></div>
+  <div class="hdr-badges">
+    <span class="hdr-badge">FLL Field (1143×2362)</span>
+    <span class="hdr-badge">+-Drive</span>
+  </div>
+  <div class="hdr-right">
+    <button class="credits-btn" id="btn-credits" title="Credits">&copy;</button>
+  </div>
+</header>
+
+<div class="credits-overlay" id="credits-overlay">
+  <div class="credits-box">
+    <h3>Ground Station</h3>
+    <p>by <strong>Sancha-Claus Tech</strong><br>FLL Robot Path Planner<br>Quadratic Bézier + Omni-wheel</p>
+    <button id="btn-credits-close">Close</button>
+  </div>
+</div>
+
+<main>
+  <!-- LEFT PANE -->
+  <aside class="pane" id="pane-controls">
+    <div class="pane-title" id="t-controls">Controls</div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-label" id="t-mode-lbl">Mode</div>
+      <div class="btn-group" style="display:flex; padding:2px; border:1px solid var(--border); border-radius:var(--radius); background:var(--bg); gap:2px;">
+        <button class="mode-btn active" id="btn-mode-draw" data-mode="draw" style="flex:1; font-size: 11px;" title="Curve Pen (D)">Curve</button>
+        <button class="mode-btn" id="btn-mode-freehand" data-mode="freehand" style="flex:1; font-size: 11px;" title="Freehand (F)">Freehand</button>
+        <button class="mode-btn" id="btn-mode-select" data-mode="select" style="flex:1; font-size: 11px;" title="Select/Route (S)">Select</button>
+        <button class="mode-btn" id="btn-mode-action" data-mode="action" style="flex:1; font-size: 11px;" title="Actions (A)">Action</button>
+      </div>
+    </div>
+
+    <!-- Context indicator -->
+    <div class="state-pill selecting" id="state-pill">...</div>
+
+    <!-- Curve list -->
+    <div id="sec-curves" class="ctrl-section">
+      <div class="ctrl-label" id="t-curves-lbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Curves</span>
+        <button id="btn-clear" title="Clear All" style="padding:2px 6px; font-size:9px; background:transparent; border:1px solid var(--border); cursor:pointer;">Clear</button>
+      </div>
+      <ul class="item-list" id="curve-list"></ul>
+    </div>
+
+    <!-- Route list -->
+    <div id="sec-route" class="ctrl-section">
+      <div class="ctrl-label" style="display:flex;align-items:center">
+        <span id="t-route-lbl">Route</span>
+        <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">—</span>
+      </div>
+      <ul class="item-list route-list" id="route-list"></ul>
+      <div class="btn-row" style="display:flex; gap:4px; margin-top:6px;">
+        <button id="btn-clear-route" style="flex:1" title="Remove all items from the route (curves stay)">Clear Route</button>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div id="sec-issues" class="ctrl-section" style="display:none">
+      <div class="ctrl-label">Check</div>
+      <ul class="issue-list" id="issue-list"></ul>
+    </div>
+
+    <!-- Inspector -->
+    <div id="sec-inspector" class="ctrl-section inspector" style="display:none">
+      <div class="ctrl-label" style="display:flex;align-items:center">
+        <span id="insp-title">Segment</span>
+        <span id="insp-len" style="margin-left:auto;text-transform:none;letter-spacing:0;font-family:var(--mono)"></span>
+      </div>
+      <label class="insp-row"><input type="checkbox" id="insp-speed-custom"><span>Custom speed</span></label>
+      <div class="insp-slider" id="insp-speed-wrap">
+        <span style="font-size:10px;color:var(--muted)">Speed</span>
+        <input type="number" id="insp-speed" min="50" step="10" value="300" class="insp-num">
+        <span class="insp-val">mm/s</span>
+      </div>
+      <label class="insp-row"><input type="checkbox" id="insp-ramp"><span>Accel / decel ramp</span></label>
+      <label class="insp-row"><input type="checkbox" id="insp-stop"><span>Stop at end</span></label>
+      <div class="insp-slider" id="insp-pause-wrap">
+        <span style="font-size:10px;color:var(--muted)">Pause</span>
+        <input type="number" id="insp-pause" min="0" step="100" value="0" class="insp-num">
+        <span class="insp-val">ms</span>
+      </div>
+      <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; margin-top:6px;">
+        <button id="insp-up" title="Move earlier">▲</button>
+        <button id="insp-down" title="Move later">▼</button>
+        <button id="insp-rev" title="Reverse direction">⇄</button>
+        <button id="insp-del" title="Remove from route (Del)">✕</button>
+      </div>
+    </div>
+
+    <!-- Action list -->
+    <div id="sec-actions" class="ctrl-section" style="display:none">
+      <div class="ctrl-label">Actions</div>
+      <ul class="item-list" id="action-list"></ul>
+    </div>
+
+
+
+    <div class="ctrl-section">
+      <div class="ctrl-label">Robot Settings</div>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359°):</div>
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
+        <input type="number" id="in-heading" value="0" min="0" max="359" style="flex:1; padding:4px; font-family:var(--sans); font-size:11px; border:1px solid var(--border); border-radius:3px;">
+        <span style="font-size:11px; color:var(--muted)">°</span>
+      </div>
+      
+      <button id="btn-open-settings" style="width:100%; padding:6px; border:1px solid var(--border); background:var(--bg); border-radius:3px; cursor:pointer; font-size:11px; margin-top:5px;">Robot Preferences</button>
+    </div>
+
+
+    <div class="ctrl-section">
+      <label><input type="checkbox" id="chk-snap" checked><span id="t-snap">Snap 100 mm</span></label>
+      <label><input type="checkbox" id="chk-obstacles" checked><span id="t-show-obs">Show Obstacles</span></label>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-label" id="t-sim-lbl">Simulation</div>
+      <div class="btn-row">
+        <button id="btn-sim-play">▶ Play</button>
+        <button id="btn-sim-stop">■ Stop</button>
+      </div>
+      <div id="sim-progress-wrap"><div id="sim-progress-bar"></div></div>
+    </div>
+
+    <div id="status-bar">
+      <span id="status-dot" class="ok"></span>
+      <span id="status-text">Ready</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted)" id="path-dist">—</span>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <section id="pane-field-outer">
+    <div id="pane-field">
+      <div id="layout-sizer">
+        <div id="field-wrap">
+          <span id="field-label-y" data-i18n="Y (mm)">Y (mm)</span>
+          <canvas id="field"></canvas>
+          <span id="field-label-x" data-i18n="X (mm)">X (mm)</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RIGHT: Code -->
+  <aside class="pane" id="pane-code">
+    <div class="pane-title" style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px;">
+      <span id="t-code-lbl">Generated Code</span>
+      <div style="display:flex; gap:4px;">
+        <button id="btn-copy-path" style="padding:3px 8px; font-size:9px; text-transform:uppercase; letter-spacing:1px; border-radius:12px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer;">Copy Path</button>
+        <button id="btn-copy" style="padding:3px 8px; font-size:9px; text-transform:uppercase; letter-spacing:1px; border-radius:12px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer;">Copy All</button>
+      </div>
+    </div>
+    <textarea id="code-out" readonly spellcheck="false"></textarea>
+  </aside>
+</main>
+<div class="tooltip" id="tooltip"></div>
+
+<!-- Settings Modal -->
+<div id="settings-modal-overlay">
+  <div id="settings-modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Robot Preferences (2-Motor Omni)</div>
+      <button class="modal-close" id="btn-close-modal">×</button>
+    </div>
+    <div class="modal-body">
+      
+      <div class="modal-group">
+        <div class="modal-group-title">Port Assignments</div>
+        <div class="modal-row">
+          <div class="modal-label">Motor X (Left/Right) Port</div>
+          <input type="text" id="pref-port-x" class="modal-input-str" value="A" maxlength="1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Motor Y (Forward/Back) Port</div>
+          <input type="text" id="pref-port-y" class="modal-input-str" value="B" maxlength="1">
+        </div>
+      </div>
+
+      <div class="modal-group">
+        <div class="modal-group-title">Hardware Specifications</div>
+        <div class="modal-row">
+          <div class="modal-label">Wheel Diameter (X) [mm]</div>
+          <input type="number" id="pref-wheel-x" class="modal-input" value="56.0" step="0.1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Wheel Diameter (Y) [mm]</div>
+          <input type="number" id="pref-wheel-y" class="modal-input" value="56.0" step="0.1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Gear Ratio (X) [Motor : Wheel]</div>
+          <div style="display:flex; align-items:center; gap:4px">
+            <input type="number" id="pref-gear-xm" class="modal-input" value="1" step="0.1" style="width:40px">
+            <span>:</span>
+            <input type="number" id="pref-gear-xw" class="modal-input" value="1" step="0.1" style="width:40px">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Gear Ratio (Y) [Motor : Wheel]</div>
+          <div style="display:flex; align-items:center; gap:4px">
+            <input type="number" id="pref-gear-ym" class="modal-input" value="1" step="0.1" style="width:40px">
+            <span>:</span>
+            <input type="number" id="pref-gear-yw" class="modal-input" value="1" step="0.1" style="width:40px">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-group">
+        <div class="modal-group-title">Software Tuning (Calibration)</div>
+        <div class="modal-row">
+          <div class="modal-label">Calibration Multiplier (X)</div>
+          <input type="number" id="pref-calib-x" class="modal-input" value="1.000" step="0.001">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Calibration Multiplier (Y)</div>
+          <input type="number" id="pref-calib-y" class="modal-input" value="1.000" step="0.001">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Backlash Compensation [Degrees]</div>
+          <input type="number" id="pref-backlash" class="modal-input" value="0" step="1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Invert Motor X (+deg moves robot left)</div>
+          <input type="checkbox" id="pref-inv-x">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Invert Motor Y (+deg moves robot backward)</div>
+          <input type="checkbox" id="pref-inv-y">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Gyro heading correction</div>
+          <input type="checkbox" id="pref-gyro" checked>
+        </div>
+      </div>
+
+      <div class="modal-group">
+        <div class="modal-group-title">Motion Profile</div>
+        <div class="modal-row">
+          <div class="modal-label">Default Target Speed [mm/s]</div>
+          <input type="number" id="pref-defspeed" class="modal-input" value="300" step="10" min="50">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Max Acceleration [mm/s²]</div>
+          <input type="number" id="pref-accel" class="modal-input" value="600" step="50" min="50">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Start / Stop Crawl Speed [mm/s]</div>
+          <input type="number" id="pref-minspeed" class="modal-input" value="40" step="5" min="10">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ES Module Entry -->
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
