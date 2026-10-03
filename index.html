@@ -1,145 +1,22 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ground Station</title>
-<style>
-/* CSSはすべて旧版と同じものをそのまま配置 */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f8f6f5;--panel:#fff;--border:#e0dcd9;--text:#222222;
-  --muted:#888;--accent:#ee827c;--ok:#ee827c;--warn:#cc2200;
-  --hover:#ff9f9a;--radius:4px;
-  --mono:'Courier New',Courier,monospace;--sans:'Segoe UI',Arial,sans-serif;
-}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);
-  height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
-
-/* ── Header ─────────────────────────────── */
-header{
-  display:flex;align-items:center;gap:14px;padding:0 20px;height:48px;
-  background:#222222;
-  border-bottom:2px solid var(--accent);color:#fff;flex-shrink:0;
-}
-.hdr-title{
-  font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
-  color:#f8f6f5;
-}
-.hdr-sep{width:1px;height:20px;background:rgba(255,255,255,.15);flex-shrink:0}
-.hdr-badges{display:flex;gap:5px}
-.hdr-badge{
-  font-size:9px;font-family:var(--mono);padding:2px 6px;
-  border:1px solid rgba(255,255,255,.18);border-radius:10px;
-  color:rgba(255,255,255,.45);letter-spacing:.5px;
-}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.credits-btn{
-  padding:3px 10px;border:none;border-radius:12px;
-  font-size:12px;font-weight:700;
-  background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);cursor:pointer;transition:all .15s;
-}
-.credits-btn:hover{color:#fff;background:rgba(255,255,255,.15)}
-.credits-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9999}
-.credits-overlay.show{display:flex}
-.credits-box{background:#fff;border-radius:10px;padding:28px 32px;max-width:340px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.2)}
-.credits-box h3{margin-bottom:8px;font-size:16px}
-.credits-box p{font-size:12px;color:#666;line-height:1.7;margin-bottom:12px}
-.credits-box button{padding:5px 18px;border-radius:16px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:11px}
-
-/* ── Layout ──────────────────────────────── */
-main{flex:1;display:grid;grid-template-columns:220px 1fr 280px;overflow:hidden;min-height:0}
-.pane{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-.pane:last-child{border-right:none}
-.pane-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--muted);padding:10px 14px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
-
-/* ── Left panel ──────────────────────────── */
-#pane-controls{background:var(--panel);overflow-y:auto}
-.ctrl-section{padding:9px 14px;border-bottom:1px solid var(--border)}
-.ctrl-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-.btn-group{display:flex;gap:4px}
-.mode-btn{flex:1;padding:5px 0;font-size:11px;font-family:var(--sans);
-  background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
-  cursor:pointer;color:var(--muted);transition:all .15s}
-.mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.mode-btn:hover:not(.active){border-color:#999;color:var(--text)}
-
-/* State indicator */
-.state-pill{
-  font-size:10px;line-height:1.55;padding:6px 10px;border-radius:var(--radius);
-  border:1px solid transparent;margin:6px 14px 0;
-}
-.state-pill.drawing{background:#fff1f0;border-color:#ffb3b0;color:#993a35}
-.state-pill.selecting{background:#f8f6f5;border-color:#e0dcd9;color:#555}
-.state-pill.wp-mode{background:#f5f5f5;border-color:var(--border);color:var(--muted)}
-
-/* Item list */
-.item-list{list-style:none;font-size:11px;font-family:var(--mono);max-height:110px;overflow-y:auto}
-.item-list li{display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid #f0f0f0;cursor:default}
-.item-list li:hover{background:#f8f8f8}
-.item-list li.cur{background:#fff1f0}
-.item-idx{width:17px;height:17px;border-radius:50%;background:var(--text);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0}
-.item-del{margin-left:auto;cursor:pointer;color:#bbb;font-size:13px;line-height:1;padding:0 2px;flex-shrink:0}
-.item-del:hover{color:var(--warn)}
-
-/* Buttons */
-button{font-family:var(--sans);font-size:11px;padding:5px 10px;
-  border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--bg);cursor:pointer;color:var(--text);white-space:nowrap}
-button:hover{border-color:#999}
-button:active{background:#e8e8e8}
-.btn-row{display:flex;gap:4px;flex-wrap:wrap}
-.btn-accent{background:var(--ok);color:#fff;border-color:var(--ok)}
-.btn-accent:hover{background:#d06e69;border-color:#d06e69}
-
-input[type=range], input[type=checkbox]{accent-color:var(--ok)}
-label{font-size:11px;display:flex;align-items:center;gap:5px;margin-bottom:3px;cursor:pointer}
-
-/* Route info */
-.route-info{font-size:11px;color:var(--muted);line-height:1.7}
-.route-info .hi{color:var(--ok);font-weight:600}
-.route-info .wo{color:var(--warn);font-weight:600}
-
-/* Status */
-#status-bar{display:flex;align-items:center;gap:6px;
-  padding:7px 14px;font-size:11px;border-bottom:1px solid var(--border)}
-#status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-#status-dot.ok{background:var(--ok)}  #status-dot.warn{background:var(--warn)}
-#sim-progress-wrap{height:3px;background:#eee;border-radius:2px;margin-top:6px;overflow:hidden}
-#sim-progress-bar{height:100%;width:0%;background:var(--ok)}
-
-/* ── Field ─────────────────────────────── */
-#pane-field-outer { flex:1; position:relative; display:flex; flex-direction:column; overflow:hidden; background:#f0eeec; }
-#pane-field { flex:1; position:relative; overflow:auto; }
-#layout-sizer { position:relative; min-width:100%; min-height:100%; }
-#field-wrap { position:absolute; top:40px; left:40px; transform-origin:0 0; }
-canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; box-shadow:0 8px 30px rgba(0,0,0,0.06); background:#fff; }
-#field-label-x { position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:12px; color:#999; pointer-events:none; }
-#field-label-y { position:absolute; top:50%; left:-35px; transform:translateY(-50%) rotate(-90deg); font-size:12px; color:#999; pointer-events:none; }
-
-/* ── Zoom Controls ─────────────────────── */
-#zoom-controls { position:absolute; bottom:20px; right:20px; display:flex; flex-direction:column; background:#fff; border-radius:6px; box-shadow:0 2px 10px rgba(0,0,0,0.1); overflow:hidden; z-index:10; }
-#zoom-controls button { width:32px; height:32px; border:none; background:transparent; font-size:18px; font-weight:bold; color:#555; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-#zoom-controls button:hover { background:#f5f5f5; color:#222; }
-#zoom-controls button:first-child { border-bottom:1px solid var(--border); }
-
-/* ── Code pane ───────────────────────────── */
-#pane-code{background:#fafafa;display:flex;flex-direction:column}
-#code-out{flex:1;font-family:var(--mono);font-size:11px;line-height:1.7;
-  padding:12px 14px;border:none;resize:none;background:transparent;color:var(--text);outline:none}
-
-/* Tooltip */
-.tooltip{position:fixed;font-size:10px;font-family:var(--mono);
-  background:rgba(34,34,34,.85);color:#fff;padding:3px 8px;border-radius:3px;
-  pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;white-space:nowrap}
-.tooltip.show{opacity:1}
-</style>
+<link rel="stylesheet" href="style.css">
+<script>
+window.addEventListener('error', function(e) {
+  alert('Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+  alert('Unhandled Rejection: ' + e.reason);
+});
+</script>
 </head>
 <body>
 
-<!-- 旧版のHTMLレイアウトをそのまま継承 -->
 <header>
   <span class="hdr-title" style="letter-spacing:1px;">GROUND STATION <span style="font-size:11px;color:var(--muted);font-weight:normal;">by Sancha-Claus Tech</span></span>
   <div class="hdr-sep"></div>
@@ -167,17 +44,11 @@ canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; 
 
     <div class="ctrl-section">
       <div class="ctrl-label" id="t-mode-lbl">Mode</div>
-      <div style="display:flex; flex-direction:column; gap:12px;">
-        <div>
-          <button class="mode-btn" id="btn-mode-wp" data-mode="waypoint" style="width:100%; padding:8px 0;">Waypoint</button>
-        </div>
-        <div>
-          <div class="btn-group" style="display:flex; padding:2px; border:1px solid var(--border); border-radius:var(--radius); background:var(--bg); gap:2px;">
-            <button class="mode-btn active" id="btn-mode-draw" data-mode="draw" style="flex:1;">Draw</button>
-            <button class="mode-btn" id="btn-mode-select" data-mode="select" style="flex:1;">Select</button>
-            <button class="mode-btn" id="btn-mode-action" data-mode="action" style="flex:1;">Action</button>
-          </div>
-        </div>
+      <div class="btn-group" style="display:flex; padding:2px; border:1px solid var(--border); border-radius:var(--radius); background:var(--bg); gap:2px;">
+        <button class="mode-btn active" id="btn-mode-draw" data-mode="draw" style="flex:1; font-size: 11px;" title="Curve Pen (D)">Curve</button>
+        <button class="mode-btn" id="btn-mode-freehand" data-mode="freehand" style="flex:1; font-size: 11px;" title="Freehand (F)">Freehand</button>
+        <button class="mode-btn" id="btn-mode-select" data-mode="select" style="flex:1; font-size: 11px;" title="Select/Route (S)">Select</button>
+        <button class="mode-btn" id="btn-mode-action" data-mode="action" style="flex:1; font-size: 11px;" title="Actions (A)">Action</button>
       </div>
     </div>
 
@@ -186,15 +57,56 @@ canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; 
 
     <!-- Curve list -->
     <div id="sec-curves" class="ctrl-section">
-      <div class="ctrl-label" id="t-curves-lbl">Curves</div>
+      <div class="ctrl-label" id="t-curves-lbl" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Curves</span>
+        <button id="btn-clear" title="Clear All" style="padding:2px 6px; font-size:9px; background:transparent; border:1px solid var(--border); cursor:pointer;">Clear</button>
+      </div>
       <ul class="item-list" id="curve-list"></ul>
-      <button id="btn-new-curve" class="btn-accent" style="margin-top:6px;width:100%">+ New Curve</button>
     </div>
 
-    <!-- Waypoint list -->
-    <div id="sec-wp" class="ctrl-section" style="display:none">
-      <div class="ctrl-label" id="t-wp-lbl">Waypoints</div>
-      <ul class="item-list" id="wp-list"></ul>
+    <!-- Route list -->
+    <div id="sec-route" class="ctrl-section">
+      <div class="ctrl-label" style="display:flex;align-items:center">
+        <span id="t-route-lbl">Route</span>
+        <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">—</span>
+      </div>
+      <ul class="item-list route-list" id="route-list"></ul>
+      <div class="btn-row" style="display:flex; gap:4px; margin-top:6px;">
+        <button id="btn-clear-route" style="flex:1" title="Remove all items from the route (curves stay)">Clear Route</button>
+      </div>
+    </div>
+
+    <!-- Issues -->
+    <div id="sec-issues" class="ctrl-section" style="display:none">
+      <div class="ctrl-label">Check</div>
+      <ul class="issue-list" id="issue-list"></ul>
+    </div>
+
+    <!-- Inspector -->
+    <div id="sec-inspector" class="ctrl-section inspector" style="display:none">
+      <div class="ctrl-label" style="display:flex;align-items:center">
+        <span id="insp-title">Segment</span>
+        <span id="insp-len" style="margin-left:auto;text-transform:none;letter-spacing:0;font-family:var(--mono)"></span>
+      </div>
+      <label class="insp-row"><input type="checkbox" id="insp-speed-custom"><span>Custom speed</span></label>
+      <div class="insp-slider" id="insp-speed-wrap">
+        <span style="font-size:10px;color:var(--muted)">Speed</span>
+        <input type="number" id="insp-speed" min="50" step="10" value="300" class="insp-num">
+        <span class="insp-val">mm/s</span>
+      </div>
+      <label class="insp-row"><input type="checkbox" id="insp-ramp"><span>Accel / decel ramp</span></label>
+      <label class="insp-row"><input type="checkbox" id="insp-stop"><span>Stop at end</span></label>
+      <div class="insp-slider" id="insp-pause-wrap">
+        <span style="font-size:10px;color:var(--muted)">Pause</span>
+        <input type="number" id="insp-pause" min="0" step="100" value="0" class="insp-num">
+        <span class="insp-val">ms</span>
+      </div>
+      <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; margin-top:6px;">
+        <button id="insp-up" title="Move earlier">▲</button>
+        <button id="insp-down" title="Move later">▼</button>
+        <button id="insp-rev" title="Reverse direction">⇄</button>
+        <button id="insp-del" title="Remove from route (Del)">✕</button>
+      </div>
     </div>
 
     <!-- Action list -->
@@ -203,53 +115,19 @@ canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; 
       <ul class="item-list" id="action-list"></ul>
     </div>
 
-    <!-- Route info (curve mode) -->
-    <div id="sec-route" class="ctrl-section">
-      <div class="ctrl-label" id="t-route-lbl">Route</div>
-      <div class="route-info" id="route-info">—</div>
-    </div>
 
-    <div class="ctrl-section">
-      <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-        <button id="btn-undo" title="Undo"><span style="font-size:13px;margin-right:4px;">↩</span><span id="t-undo">Undo</span></button>
-        <button id="btn-clear" title="Clear All"><span style="font-size:13px;margin-right:4px;">🗑</span><span id="t-clear">Clear</span></button>
-        <button id="btn-sel-all" title="Select All"><span style="font-size:13px;margin-right:4px;">☑</span><span id="t-sel-all">Sel All</span></button>
-        <button id="btn-desel-all" title="Deselect"><span style="font-size:13px;margin-right:4px;">☐</span><span id="t-desel-all">Desel</span></button>
-      </div>
-    </div>
 
     <div class="ctrl-section">
       <div class="ctrl-label">Robot Settings</div>
-      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction:</div>
-      <select id="sel-heading" style="width:100%; margin-bottom:10px; padding:4px; font-family:var(--sans); font-size:11px; border:1px solid var(--border); border-radius:3px;">
-        <option value="0">North (0°)</option>
-        <option value="90">East (90°)</option>
-        <option value="180">South (180°)</option>
-        <option value="270">West (270°)</option>
-      </select>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359°):</div>
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
+        <input type="number" id="in-heading" value="0" min="0" max="359" style="flex:1; padding:4px; font-family:var(--sans); font-size:11px; border:1px solid var(--border); border-radius:3px;">
+        <span style="font-size:11px; color:var(--muted)">°</span>
+      </div>
       
-      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Gear Ratios (Motor : Wheel):</div>
-      <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px;">
-        <span style="font-size:10px; color:var(--muted); width:45px;">X Motor</span>
-        <input type="number" id="gear-x1" value="16" step="1" style="width:40px; padding:2px; font-size:11px; text-align:center; border:1px solid var(--border); border-radius:3px;">
-        <span>:</span>
-        <input type="number" id="gear-x2" value="16" step="1" style="width:40px; padding:2px; font-size:11px; text-align:center; border:1px solid var(--border); border-radius:3px;">
-      </div>
-      <div style="display:flex; align-items:center; gap:4px;">
-        <span style="font-size:10px; color:var(--muted); width:45px;">Y Motor</span>
-        <input type="number" id="gear-y1" value="16" step="1" style="width:40px; padding:2px; font-size:11px; text-align:center; border:1px solid var(--border); border-radius:3px;">
-        <span>:</span>
-        <input type="number" id="gear-y2" value="16" step="1" style="width:40px; padding:2px; font-size:11px; text-align:center; border:1px solid var(--border); border-radius:3px;">
-      </div>
+      <button id="btn-open-settings" style="width:100%; padding:6px; border:1px solid var(--border); background:var(--bg); border-radius:3px; cursor:pointer; font-size:11px; margin-top:5px;">Robot Preferences</button>
     </div>
 
-    <div class="ctrl-section">
-      <div class="ctrl-label" id="t-speed-lbl">Speed</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <input type="range" id="sl-speed" min="50" max="800" value="300">
-        <span id="sl-speed-val" style="font-family:var(--mono);font-size:11px;white-space:nowrap">300 mm/s</span>
-      </div>
-    </div>
 
     <div class="ctrl-section">
       <label><input type="checkbox" id="chk-snap" checked><span id="t-snap">Snap 100 mm</span></label>
@@ -283,18 +161,7 @@ canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; 
         </div>
       </div>
     </div>
-    <div id="compass-rose" style="position:absolute; bottom:20px; right:64px; width:45px; height:45px; z-index:10; pointer-events:none; opacity:0.7; display:flex; align-items:center; justify-content:center;">
-      <svg viewBox="0 0 100 100" width="100%" height="100%">
-        <text x="50" y="20" font-size="22" text-anchor="middle" fill="#777" font-family="sans-serif" font-weight="bold">N</text>
-        <path d="M 50 26 L 25 65 L 50 65 Z" fill="#777" />
-        <line x1="50" y1="26" x2="50" y2="85" stroke="#777" stroke-width="4" stroke-linecap="round" />
-        <line x1="23" y1="65" x2="77" y2="65" stroke="#777" stroke-width="4" stroke-linecap="round" />
-      </svg>
-    </div>
-    <div id="zoom-controls">
-      <button id="btn-zoom-in" title="Zoom In">+</button>
-      <button id="btn-zoom-out" title="Zoom Out">−</button>
-    </div>
+
   </section>
 
   <!-- RIGHT: Code -->
@@ -311,286 +178,104 @@ canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; 
 </main>
 <div class="tooltip" id="tooltip"></div>
 
-<script>
-// ════════════════════════════════════════════════════════════
-//  Constants & SVG Parsing (Bioglow)
-// ════════════════════════════════════════════════════════════
-const FIELD_W    = 2362;
-const FIELD_H    = 1143;
-const OFFSET_X   = 181;
-const PIN_R      = 7;
-const SNAP_MM    = 100;
-const ROBOT_W    = 200;
-const ROBOT_H    = 200;
-const HANDLE_R   = 5;
-const IX_R       = 4;
-const SEG_HIT    = 14;   
-const NODE_HIT   = 10;   
-const DISC_N     = 60;   
-const SEG_PTS    = 50;   
-const MATCH_TOL  = 8;    
-const MIN_SEG_T  = 0.008;
+<!-- Settings Modal -->
+<div id="settings-modal-overlay">
+  <div id="settings-modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Robot Preferences (2-Motor Omni)</div>
+      <button class="modal-close" id="btn-close-modal">×</button>
+    </div>
+    <div class="modal-body">
+      
+      <div class="modal-group">
+        <div class="modal-group-title">Port Assignments</div>
+        <div class="modal-row">
+          <div class="modal-label">Motor X (Left/Right) Port</div>
+          <input type="text" id="pref-port-x" class="modal-input-str" value="A" maxlength="1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Motor Y (Forward/Back) Port</div>
+          <input type="text" id="pref-port-y" class="modal-input-str" value="B" maxlength="1">
+        </div>
+      </div>
 
-const OBSTACLES = [
-  { x:-OFFSET_X, y:FIELD_H, w:FIELD_W, h:0, label:'' },
-  { x:-OFFSET_X, y:0, w:FIELD_W, h:0, label:'' },
-  { x:-OFFSET_X, y:0, w:0, h:FIELD_H, label:'' },
-  { x:FIELD_W-OFFSET_X, y:0, w:0, h:FIELD_H, label:'' }
-];
+      <div class="modal-group">
+        <div class="modal-group-title">Hardware Specifications</div>
+        <div class="modal-row">
+          <div class="modal-label">Wheel Diameter (X) [mm]</div>
+          <input type="number" id="pref-wheel-x" class="modal-input" value="56.0" step="0.1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Wheel Diameter (Y) [mm]</div>
+          <input type="number" id="pref-wheel-y" class="modal-input" value="56.0" step="0.1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Gear Ratio (X) [Motor : Wheel]</div>
+          <div style="display:flex; align-items:center; gap:4px">
+            <input type="number" id="pref-gear-xm" class="modal-input" value="1" step="0.1" style="width:40px">
+            <span>:</span>
+            <input type="number" id="pref-gear-xw" class="modal-input" value="1" step="0.1" style="width:40px">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Gear Ratio (Y) [Motor : Wheel]</div>
+          <div style="display:flex; align-items:center; gap:4px">
+            <input type="number" id="pref-gear-ym" class="modal-input" value="1" step="0.1" style="width:40px">
+            <span>:</span>
+            <input type="number" id="pref-gear-yw" class="modal-input" value="1" step="0.1" style="width:40px">
+          </div>
+        </div>
+      </div>
 
-const svgRaw = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%" viewBox="0 0 1649 938" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <g transform="matrix(1,0,0,1,-137.665882,-87.284235)">
-        <g transform="matrix(1.00228,0,0,0.987577,-3.249585,7.686041)">
-            <rect x="140.595" y="82.334" width="1644.668" height="947.551" style="fill:rgb(16,16,16);fill-opacity:0.9;"/>
-        </g>
-        <g>
-            <g>
-                <g transform="matrix(0.991081,0,0,1,1.265168,0.251606)">
-                    <rect x="201.413" y="452.302" width="20.506" height="9.435" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.991081,0,0,1,1.265168,0.251606)">
-                    <rect x="168.327" y="458.718" width="43.339" height="33.338" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.991081,0,0,1,1.265168,0.251606)">
-                    <rect x="161.407" y="465.511" width="6.919" height="39.754" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.991081,0,0,1,1.265168,-1.635427)">
-                    <rect x="155.243" y="480.859" width="6.164" height="17.109" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.991081,0,0,1,420.820535,0.251606)">
-                    <rect x="168.327" y="458.718" width="43.339" height="33.338" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.991081,0,0,1,420.820535,0.251606)">
-                    <rect x="161.407" y="465.511" width="6.919" height="39.754" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.991081,0,0,1,420.820535,-1.635427)">
-                    <rect x="155.243" y="480.859" width="6.164" height="17.109" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g>
-                <g transform="matrix(1.000983,0,0,1.008453,-0.22508,-1.426179)">
-                    <rect x="228.948" y="168.714" width="67.933" height="67.43" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(1,0,0,1.018778,0,-4.444905)">
-                    <rect x="203.535" y="196.516" width="25.412" height="40.198" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.569307,0,0,0.654914,73.194054,74.012675)">
-                    <rect x="203.535" y="196.516" width="25.412" height="40.198" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.707107,0.707107,-0.720384,0.720384,236.942938,-136.00296)">
-                    <rect x="203.535" y="196.516" width="25.412" height="40.198" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.402561,0.402561,-0.463094,0.463094,233.221063,-28.76906)">
-                    <rect x="203.535" y="196.516" width="25.412" height="40.198" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,1,-1.018778,0,497.154021,-60.233404)">
-                    <rect x="203.535" y="196.516" width="25.412" height="40.198" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,0.569307,-0.654914,0,418.696441,12.960651)">
-                    <rect x="203.535" y="196.516" width="25.412" height="40.198" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g>
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                <g transform="matrix(0.228972,0,0,0.539793,379.388,88.442264)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.271028,0,0,0.269896,350.988675,112.255351)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g>
-                <g transform="matrix(0.198295,0.114486,-0.269896,0.467474,700.080387,44.396742)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.198295,0.114486,-0.136808,0.236959,665.310003,75.894789)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.198295,0.114486,-0.136808,0.236959,690.187469,90.257801)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.540959,0.312323,-0.332823,0.576466,539.290324,-53.178097)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g>
-                <g transform="matrix(1.273139,1.273139,-1.212765,1.212765,919.706327,-603.328853)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.916697,0.916697,-0.222333,0.222333,957.515183,-287.88735)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(1.185424,-0,0,0.589728,884.742495,87.090865)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g transform="matrix(0.226313,-0,0,0.376883,1622.730856,509.641407)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.436593,-0,0,0.426191,1526.337845,523.320263)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.436593,-0,0,0.426191,1519.261477,536.926094)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g>
-                <g transform="matrix(2.169256,-0,0,2.069485,-67.7387,272.316973)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.992667,-0,0,0.146327,478.318267,434.998085)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.992667,-0,0,0.146327,478.318267,540.998085)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g transform="matrix(0.707107,0.707107,-0.707107,0.707107,1364.12502,-865.359145)">
-                <g transform="matrix(2.169256,-0,0,2.069485,-67.7387,272.316973)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.992667,-0,0,0.146327,478.318267,434.998085)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.992667,-0,0,0.146327,478.318267,540.998085)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g transform="matrix(2.169256,-0,0,2.069485,161.07613,708.844933)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.992667,-0,0,0.146327,707.133096,871.526045)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.866025,-0.5,0.5,0.866025,-289.052968,593.154872)">
-                <g transform="matrix(1.579022,0,0,1.003174,253.935718,748.050809)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.436593,0,0,0.30936,762.936054,809.266336)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.218296,0,0,0.30936,870.349839,824.065474)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,0.436593,-0.30936,0,1058.195948,621.733702)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,0.218296,-0.30936,0,1043.396811,729.147487)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.436593,-0,0,0.30936,1245.728582,809.266336)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.218296,-0,0,0.30936,1138.314797,824.065474)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.436593,0.30936,-0,950.468688,621.733702)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.218296,0.30936,-0,965.267825,729.147487)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-            <g transform="matrix(0.992667,-0,0,0.146327,707.133096,977.526045)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.436593,0,0,0.30936,664.653203,934.373306)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(1.20519,0,0,0.549193,83.389247,908.281254)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(1.012372,0,0,1.019586,-13.750836,-19.931379)">
-                <ellipse cx="1087.253" cy="970" rx="26.67" ry="26.481" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(1.012372,0,0,1.019586,630.364381,-591.037442)">
-                <ellipse cx="1087.253" cy="970" rx="26.67" ry="26.481" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.112486,0,0,0.113287,1608.768846,188.886637)">
-                <ellipse cx="1087.253" cy="970" rx="26.67" ry="26.481" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.291547,-0.291547,0.201394,0.201394,822.5504,544.389638)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.291547,-0.291547,0.302109,0.302109,833.109747,535.326669)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.145773,-0.145773,0.100697,0.100697,912.886186,481.457285)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.145773,-0.145773,0.100697,0.100697,932.368188,481.244736)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(0.154359,-0.154359,0.380765,0.380765,1203.579261,260.840437)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(1.385665,-1.385665,0.929726,0.929726,533.296106,1085.000818)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(1.029123,-1.029123,0.509623,0.509623,119.142323,1005.211981)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g transform="matrix(1.029123,1.029123,-0.509623,0.509623,233.450225,27.074178)">
-                <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-            </g>
-            <g>
-                <g transform="matrix(0.875962,-0,0,1.111891,209.827442,17.703037)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.514878,-0.708668,0.135293,0.098296,391.003517,444.05352)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0.875962,0,0,0.167231,249.317789,106.511336)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,-0.978766,0.167231,-0,612.354905,650.602526)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,-0.231104,0.119967,-0,624.525046,282.711993)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,-0.231104,0.391175,0,606.335197,242.400225)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,-0.595589,0.151211,0,627.50739,429.524001)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,-0.198394,0.390282,0,587.743757,206.749855)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(0,-0.382706,0.209298,0,622.382305,304.117912)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.875962,0,-0,-1.111891,1025.508108,267.137887)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.514878,0.708668,-0.135293,-0.098296,844.332034,-159.212596)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0.875962,-0,-0,-0.167231,986.017762,178.329589)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.572225,-0.167231,0,622.980645,-165.721189)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.231104,-0.119967,-0,610.810505,2.128931)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.231104,-0.391175,-0,629.000354,42.4407)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.418019,-0.391175,-0,629.000354,-69.224082)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.198394,-0.390282,-0,647.591794,78.09107)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-                <g transform="matrix(-0,0.382706,-0.209298,-0,612.953245,-19.276988)">
-                    <rect x="458.403" y="88.23" width="33.652" height="47.838" style="fill:rgb(235,235,235);"/>
-                </g>
-            </g>
-        </g>
-    </g>
-</svg>`;
-The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+      <div class="modal-group">
+        <div class="modal-group-title">Software Tuning (Calibration)</div>
+        <div class="modal-row">
+          <div class="modal-label">Calibration Multiplier (X)</div>
+          <input type="number" id="pref-calib-x" class="modal-input" value="1.000" step="0.001">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Calibration Multiplier (Y)</div>
+          <input type="number" id="pref-calib-y" class="modal-input" value="1.000" step="0.001">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Backlash Compensation [Degrees]</div>
+          <input type="number" id="pref-backlash" class="modal-input" value="0" step="1">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Invert Motor X (+deg moves robot left)</div>
+          <input type="checkbox" id="pref-inv-x">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Invert Motor Y (+deg moves robot backward)</div>
+          <input type="checkbox" id="pref-inv-y">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Gyro heading correction</div>
+          <input type="checkbox" id="pref-gyro" checked>
+        </div>
+      </div>
+
+      <div class="modal-group">
+        <div class="modal-group-title">Motion Profile</div>
+        <div class="modal-row">
+          <div class="modal-label">Default Target Speed [mm/s]</div>
+          <input type="number" id="pref-defspeed" class="modal-input" value="300" step="10" min="50">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Max Acceleration [mm/s²]</div>
+          <input type="number" id="pref-accel" class="modal-input" value="600" step="50" min="50">
+        </div>
+        <div class="modal-row">
+          <div class="modal-label">Start / Stop Crawl Speed [mm/s]</div>
+          <input type="number" id="pref-minspeed" class="modal-input" value="40" step="5" min="10">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ES Module Entry -->
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
