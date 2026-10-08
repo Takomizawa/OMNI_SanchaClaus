@@ -67,7 +67,7 @@ window.addEventListener('unhandledrejection', function(e) {
     <div id="sec-route" class="ctrl-section">
       <div class="ctrl-label" style="display:flex;align-items:center">
         <span id="t-route-lbl">Route</span>
-        <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">—</span>
+        <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">窶・/span>
       </div>
       <ul class="item-list route-list" id="route-list"></ul>
       <div class="btn-row" style="display:flex; gap:4px; margin-top:6px;">
@@ -103,8 +103,8 @@ window.addEventListener('unhandledrejection', function(e) {
       <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; margin-top:6px;">
         <button id="insp-up" title="Move earlier">▲</button>
         <button id="insp-down" title="Move later">▼</button>
-        <button id="insp-rev" title="Reverse direction">⇄</button>
-        <button id="insp-del" title="Remove from route (Del)">✕</button>
+        <button id="insp-rev" title="Reverse direction">竍・/button>
+        <button id="insp-del" title="Remove from route (Del)">笨・/button>
       </div>
     </div>
 
@@ -118,10 +118,10 @@ window.addEventListener('unhandledrejection', function(e) {
 
     <div class="ctrl-section">
       <div class="ctrl-label">Robot Settings</div>
-      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359°):</div>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359ﾂｰ):</div>
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
         <input type="number" id="in-heading" value="0" min="0" max="359" style="flex:1; padding:4px; font-family:var(--sans); font-size:11px; border:1px solid var(--border); border-radius:3px;">
-        <span style="font-size:11px; color:var(--muted)">°</span>
+        <span style="font-size:11px; color:var(--muted)">ﾂｰ</span>
       </div>
       
       <button id="btn-open-settings" style="width:100%; padding:6px; border:1px solid var(--border); background:var(--bg); border-radius:3px; cursor:pointer; font-size:11px; margin-top:5px;">Robot Preferences</button>
@@ -137,7 +137,7 @@ window.addEventListener('unhandledrejection', function(e) {
       <div class="ctrl-label" id="t-sim-lbl">Simulation</div>
       <div class="btn-row">
         <button id="btn-sim-play">▶ Play</button>
-        <button id="btn-sim-stop">■ Stop</button>
+        <button id="btn-sim-stop">⏹ Stop</button>
       </div>
       <div id="sim-progress-wrap"><div id="sim-progress-bar"></div></div>
     </div>
@@ -145,7 +145,7 @@ window.addEventListener('unhandledrejection', function(e) {
     <div id="status-bar">
       <span id="status-dot" class="ok"></span>
       <span id="status-text">Ready</span>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted)" id="path-dist">—</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted)" id="path-dist">窶・/span>
     </div>
   </aside>
 
@@ -181,8 +181,8 @@ window.addEventListener('unhandledrejection', function(e) {
 <div id="settings-modal-overlay">
   <div id="settings-modal">
     <div class="modal-header">
-      <div class="modal-title">⚙️ Robot Preferences (2-Motor Omni)</div>
-      <button class="modal-close" id="btn-close-modal">×</button>
+      <div class="modal-title">笞呻ｸ・Robot Preferences (2-Motor Omni)</div>
+      <button class="modal-close" id="btn-close-modal">ﾃ・/button>
     </div>
     <div class="modal-body">
       
@@ -190,11 +190,11 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="modal-group-title">Port Assignments</div>
         <div class="modal-row">
           <div class="modal-label">Motor X (Left/Right) Port</div>
-          <input type="text" id="pref-port-x" class="modal-input-str" value="A" maxlength="1">
+          <input type="text" id="pref-port-x" class="modal-input-str" value="B" maxlength="1">
         </div>
         <div class="modal-row">
           <div class="modal-label">Motor Y (Forward/Back) Port</div>
-          <input type="text" id="pref-port-y" class="modal-input-str" value="B" maxlength="1">
+          <input type="text" id="pref-port-y" class="modal-input-str" value="A" maxlength="1">
         </div>
       </div>
 
@@ -230,11 +230,11 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="modal-group-title">Software Tuning (Calibration)</div>
         <div class="modal-row">
           <div class="modal-label">Calibration Multiplier (X)</div>
-          <input type="number" id="pref-calib-x" class="modal-input" value="1.000" step="0.001">
+          <input type="number" id="pref-calib-x" class="modal-input" value="1.0256" step="0.0001">
         </div>
         <div class="modal-row">
           <div class="modal-label">Calibration Multiplier (Y)</div>
-          <input type="number" id="pref-calib-y" class="modal-input" value="1.000" step="0.001">
+          <input type="number" id="pref-calib-y" class="modal-input" value="1.0256" step="0.0001">
         </div>
         <div class="modal-row">
           <div class="modal-label">Backlash Compensation [Degrees]</div>
@@ -278,3 +278,4 @@ window.addEventListener('unhandledrejection', function(e) {
 <script type="module" src="main.js"></script>
 </body>
 </html>
+
