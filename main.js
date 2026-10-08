@@ -1,12 +1,10 @@
 import { State, saveUndoState, performUndo, performRedo } from './state.js';
-import { rebuildSegmentsAndIntersections, polyCollides, polyLen, NODE_HIT, SEG_HIT } from './math.js';
+import { rebuildSegmentsAndIntersections, polyCollides, polyLen, NODE_HIT, SEG_HIT, simplifyPoly, pointsToBezier } from './math.js';
 import { initCanvas, resizeCanvas, draw, getXY, canvas, toCx, toCy } from './canvas.js';
 import { startSim, stopSim } from './sim.js';
 import { generateCode } from './codegen.js';
 import { appendSeg, remapRoute, buildPlan, validateRoute, autoFixAll, routeIndexOfSeg,
          segItemPts, routePieces, newLinkItem, projectOnPlan, PIN_ON_TOL } from './route.js';
-
-// Init canvas immediately so exported variables are populated
 initCanvas();
 
 // ════════════════════════════════════════════════════════════
@@ -96,22 +94,51 @@ function updateZoom(newZ) {
   draw();
 }
 
-document.getElementById('btn-zoom-in').addEventListener('click', () => {
-  if (State.zoomIndex < State.ZOOM_LEVELS.length - 1) {
-    State.zoomIndex++;
-    updateZoom(State.ZOOM_LEVELS[State.zoomIndex]);
+const paneField = document.getElementById('pane-field');
+paneField.addEventListener('wheel', (e) => {
+  if (e.ctrlKey) {
+    e.preventDefault();
+    const dir = Math.sign(e.deltaY);
+    if (dir > 0 && State.zoomIndex > 0) {
+      State.zoomIndex--;
+      updateZoom(State.ZOOM_LEVELS[State.zoomIndex]);
+    } else if (dir < 0 && State.zoomIndex < State.ZOOM_LEVELS.length - 1) {
+      State.zoomIndex++;
+      updateZoom(State.ZOOM_LEVELS[State.zoomIndex]);
+    }
   }
 });
 
-document.getElementById('btn-zoom-out').addEventListener('click', () => {
-  if (State.zoomIndex > 0) {
-    State.zoomIndex--;
-    updateZoom(State.ZOOM_LEVELS[State.zoomIndex]);
+let isPanning = false;
+let panStartX, panStartY, panScrollLeft, panScrollTop;
+
+paneField.addEventListener('mousedown', (e) => {
+  if (e.button === 1 || (e.button === 0 && e.shiftKey)) { // Middle click or Shift+Click
+    e.preventDefault();
+    isPanning = true;
+    panStartX = e.clientX;
+    panStartY = e.clientY;
+    panScrollLeft = paneField.scrollLeft;
+    panScrollTop = paneField.scrollTop;
+    paneField.style.cursor = 'grabbing';
+  }
+});
+window.addEventListener('mousemove', (e) => {
+  if (isPanning) {
+    paneField.scrollLeft = panScrollLeft - (e.clientX - panStartX);
+    paneField.scrollTop = panScrollTop - (e.clientY - panStartY);
+  }
+});
+window.addEventListener('mouseup', (e) => {
+  if (isPanning) {
+    isPanning = false;
+    paneField.style.cursor = '';
   }
 });
 
 canvas.addEventListener('mousedown',e=>{
-  if(e.button === 2 || e.button === 1){
+  if (isPanning) return;
+  if(e.button === 2 || e.button === 1 || e.shiftKey){
     e.preventDefault();
     return;
   }
@@ -173,6 +200,10 @@ canvas.addEventListener('mousedown',e=>{
     refresh();
     return;
   }
+  if(State.mode==='freehand'){
+    State.freehandPts = [{x: m.snapX, y: m.snapY}];
+    return;
+  }
 
   if(State.mode==='draw'){
     if(State.activeCurveId===null){
@@ -216,6 +247,13 @@ canvas.addEventListener('mousemove',e=>{
   if(ddx*ddx+ddy*ddy>16) State.mouseIsDragging=true;
 
   if(!State.dragTarget){
+    if(State.mode==='freehand' && State.freehandPts){
+      const last = State.freehandPts[State.freehandPts.length - 1];
+      if (Math.hypot(m.snapX - last.x, m.snapY - last.y) > 10) {
+        State.freehandPts.push({x: m.snapX, y: m.snapY});
+      }
+      draw(); return;
+    }
     if(State.mode==='select'){
       const hs=hitSegment(m.cpx,m.cpy);
       if(hs!==State.hoverSegId) State.hoverSegId=hs;
@@ -236,8 +274,17 @@ canvas.addEventListener('mousemove',e=>{
   if(State.dragTarget.type==='node'){
     const c=State.curves.find(c=>c.id===State.dragTarget.cid);
     if(!c) return;
-    c.nodes[State.dragTarget.ni].x=m.snapX;
-    c.nodes[State.dragTarget.ni].y=m.snapY;
+    if (c.type === 'freehand') {
+      const ni = State.dragTarget.ni;
+      const dx = m.snapX - c.nodes[ni].x;
+      const dy = m.snapY - c.nodes[ni].y;
+      for (const p of c.pts) { p.x += dx; p.y += dy; }
+      c.nodes[0].x += dx; c.nodes[0].y += dy;
+      c.nodes[1].x += dx; c.nodes[1].y += dy;
+    } else {
+      c.nodes[State.dragTarget.ni].x=m.snapX;
+      c.nodes[State.dragTarget.ni].y=m.snapY;
+    }
     onCurvesChanged();return;
   }
 });
@@ -245,11 +292,31 @@ canvas.addEventListener('mousemove',e=>{
 canvas.addEventListener('mouseup',e=>{
   if(e.button === 2 || e.button === 1) return;
   State.dragTarget=null; State.mouseIsDragging=false;
+
+  if(State.mode==='freehand' && State.freehandPts) {
+    if(State.freehandPts.length > 1) {
+      saveUndoState();
+      const simplified = simplifyPoly(State.freehandPts, 3); // 3mm tolerance to keep it mostly smooth but not heavy
+      if(simplified.length >= 2) {
+        const c = {
+          id: State.curveIdCtr++,
+          type: 'freehand',
+          pts: simplified,
+          nodes: [ {x: simplified[0].x, y: simplified[0].y}, {x: simplified[simplified.length-1].x, y: simplified[simplified.length-1].y} ]
+        };
+        State.curves.push(c);
+        onCurvesChanged();
+      }
+    }
+    State.freehandPts = null;
+    draw();
+  }
 });
 
 canvas.addEventListener('mouseleave',()=>{
   State.dragTarget=null;State.mouseIsDragging=false;
   State.hoverSegId=null;State.lastMouse=null;
+  State.freehandPts = null;
   tooltip.classList.remove('show');
   draw();
 });
@@ -297,6 +364,7 @@ document.addEventListener('keydown',e=>{
   if(e.ctrlKey || e.metaKey || e.altKey) return;
 
   if(e.key==='d' || e.key==='D'){ switchMode('draw'); return; }
+  if(e.key==='f' || e.key==='F'){ switchMode('freehand'); return; }
   if(e.key==='s' || e.key==='S'){ switchMode('select'); return; }
   if(e.key==='a' || e.key==='A'){ switchMode('action'); return; }
 
@@ -392,6 +460,9 @@ function updateStatePill(){
   if(State.mode==='draw'){
     pill.className='state-pill drawing';
     pill.innerHTML='Click Start → End → Middle<br>to draw a curve (straight: Middle on the line)';
+  }else if(State.mode==='freehand'){
+    pill.className='state-pill drawing';
+    pill.innerHTML='Click and drag to draw a continuous freehand path.<br>It will be smoothed automatically.';
   }else{
     pill.className='state-pill selecting';
     pill.innerHTML='Click curves in driving order to build the route<br>Shift/right-click: remove · Drag rows to reorder';
@@ -478,7 +549,6 @@ function updateIssues(issues){
     });
     list.appendChild(li);
   });
-  document.getElementById('btn-autofix').disabled = !issues.some(i=>i.fix);
 }
 
 // Inspector -------------------------------------------------
@@ -498,7 +568,6 @@ function updateInspector(){
   document.getElementById('insp-speed-custom').checked=custom;
   const sl=document.getElementById('insp-speed');
   if(document.activeElement!==sl) sl.value = it.speed || State.speed;
-  document.getElementById('insp-speed-val').textContent=(it.speed||State.speed)+' mm/s';
   document.getElementById('insp-speed-wrap').classList.toggle('insp-disabled',!custom);
   document.getElementById('insp-ramp').checked = it.ramp!==false;
   document.getElementById('insp-stop').checked = !!it.stop;
@@ -553,7 +622,7 @@ function updateCurveList(){
     const li=document.createElement('li');
     li.className=c.id===State.activeCurveId?'cur':'';
     li.innerHTML='<span class="item-idx">'+(ci+1)+'</span>'
-      +'<span>C'+(ci+1)+' · '+(c.nodes.length<3?c.nodes.length+'/3 nodes':'curve')+(used?' <span style="color:var(--ok)">●</span>':'')+'</span>'
+      +'<span>C'+(ci+1)+' · '+(c.type === 'freehand' ? 'freehand' : (c.nodes.length<3?c.nodes.length+'/3 nodes':'curve'))+(used?' <span style="color:var(--ok)">●</span>':'')+'</span>'
       +'<span class="item-del" data-id="'+c.id+'">&#215;</span>';
     li.style.cursor='pointer';
     li.addEventListener('click',e=>{
@@ -631,6 +700,11 @@ function switchMode(m){
   document.getElementById('sec-curves').style.display=(m==='draw')?'':'none';
   document.getElementById('sec-actions').style.display=(m==='action')?'':'none';
   State.hoverSegId=null;
+  if (m === 'draw' || m === 'freehand') {
+    const shouldSnap = (m === 'draw');
+    document.getElementById('chk-snap').checked = shouldSnap;
+    State.snapOn = shouldSnap;
+  }
   if (m !== 'draw') finalizeCurve();
   refresh();
 }
@@ -641,22 +715,11 @@ function switchMode(m){
 document.querySelectorAll('.mode-btn').forEach(btn=>
   btn.addEventListener('click',()=>switchMode(btn.dataset.mode)));
 
-document.getElementById('btn-new-curve').addEventListener('click',()=>{
-  switchMode('draw'); finalizeCurve(); refresh();
-});
 
-document.getElementById('btn-autofix').addEventListener('click',()=>{
-  saveUndoState(); autoFixAll(); onRouteChanged();
-});
+
 document.getElementById('btn-clear-route').addEventListener('click',()=>{
   if(!State.route.length) return;
   saveUndoState(); State.route=[]; State.focusUid=null; stopSim(); refresh();
-});
-
-document.getElementById('sl-speed').addEventListener('input',function(){
-  State.speed=+this.value;
-  document.getElementById('sl-speed-val').textContent=State.speed+' mm/s';
-  refresh();
 });
 
 // Modal and Preferences Logic
@@ -677,6 +740,7 @@ document.getElementById('btn-open-settings').addEventListener('click', () => {
   document.getElementById('pref-inv-x').checked = State.prefInvertX;
   document.getElementById('pref-inv-y').checked = State.prefInvertY;
   document.getElementById('pref-gyro').checked = State.prefUseGyro;
+  document.getElementById('pref-defspeed').value = State.speed;
   document.getElementById('pref-accel').value = State.prefAccel;
   document.getElementById('pref-minspeed').value = State.prefMinSpeed;
   modal.classList.add('active');
@@ -698,6 +762,7 @@ function syncPreferencesFromUI() {
   State.prefInvertX = document.getElementById('pref-inv-x').checked;
   State.prefInvertY = document.getElementById('pref-inv-y').checked;
   State.prefUseGyro = document.getElementById('pref-gyro').checked;
+  State.speed = Math.max(50, parseFloat(document.getElementById('pref-defspeed').value) || 300);
   State.prefAccel = Math.max(50, parseFloat(document.getElementById('pref-accel').value) || 600);
   State.prefMinSpeed = Math.max(10, parseFloat(document.getElementById('pref-minspeed').value) || 40);
   refresh();
@@ -721,7 +786,7 @@ const prefInputs = [
   'pref-port-x', 'pref-port-y', 'pref-wheel-x', 'pref-wheel-y',
   'pref-gear-xm', 'pref-gear-xw', 'pref-gear-ym', 'pref-gear-yw',
   'pref-calib-x', 'pref-calib-y', 'pref-backlash',
-  'pref-inv-x', 'pref-inv-y', 'pref-gyro', 'pref-accel', 'pref-minspeed'
+  'pref-inv-x', 'pref-inv-y', 'pref-gyro', 'pref-defspeed', 'pref-accel', 'pref-minspeed'
 ];
 prefInputs.forEach(id => {
   const el = document.getElementById(id);
@@ -751,9 +816,7 @@ document.getElementById('btn-clear').addEventListener('click',()=>{
   stopSim(); refresh();
 });
 
-document.getElementById('btn-undo').addEventListener('click',()=>{
-  performUndo(onUndoRedoRestore);
-});
+
 
 document.getElementById('btn-sim-play').addEventListener('click',startSim);
 document.getElementById('btn-sim-stop').addEventListener('click',stopSim);

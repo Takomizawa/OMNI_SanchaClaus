@@ -24,6 +24,12 @@ export const OBSTACLES = [
   { x:FIELD_W-OFFSET_X, y:0, w:0, h:FIELD_H, label:'' }
 ];
 
+import { parseFLLMissions } from './missions.js';
+export const MISSIONS = parseFLLMissions(FIELD_W, FIELD_H);
+for (const m of MISSIONS) {
+  OBSTACLES.push(m.aabb);
+}
+
 // ════════════════════════════════════════════════════════════
 //  Bézier Math  (nodes = [start, end, control])
 // ════════════════════════════════════════════════════════════
@@ -35,6 +41,25 @@ export function bzAt(p1, p2, cp, t){
   };
 }
 export function evalSpan(curve, t){
+  if (curve.type === 'freehand') {
+    if (t <= 0) return curve.pts[0];
+    if (t >= 1) return curve.pts[curve.pts.length - 1];
+    const L = polyLen(curve.pts);
+    const target = L * t;
+    let acc = 0;
+    for (let i = 0; i + 1 < curve.pts.length; i++) {
+      const segL = Math.hypot(curve.pts[i+1].x - curve.pts[i].x, curve.pts[i+1].y - curve.pts[i].y);
+      if (acc + segL >= target) {
+        const f = segL === 0 ? 0 : (target - acc) / segL;
+        return {
+          x: curve.pts[i].x + (curve.pts[i+1].x - curve.pts[i].x) * f,
+          y: curve.pts[i].y + (curve.pts[i+1].y - curve.pts[i].y) * f
+        };
+      }
+      acc += segL;
+    }
+    return curve.pts[curve.pts.length - 1];
+  }
   if(curve.nodes.length < 3) {
     const p1 = curve.nodes[0], p2 = curve.nodes[1] || p1;
     return { x: p1.x + t*(p2.x - p1.x), y: p1.y + t*(p2.y - p1.y) };
@@ -61,6 +86,44 @@ export function polyLen(pts){
   for(let i=0;i+1<pts.length;i++) d+=Math.hypot(pts[i+1].x-pts[i].x, pts[i+1].y-pts[i].y);
   return d;
 }
+export function simplifyPoly(pts, tol){
+  if(pts.length <= 2) return pts;
+  let maxDist = 0;
+  let index = 0;
+  const end = pts.length - 1;
+  for (let i = 1; i < end; i++) {
+    const d = pointLineDist(pts[i], pts[0], pts[end]);
+    if (d > maxDist) {
+      maxDist = d;
+      index = i;
+    }
+  }
+  if (maxDist > tol) {
+    const left = simplifyPoly(pts.slice(0, index + 1), tol);
+    const right = simplifyPoly(pts.slice(index), tol);
+    return left.slice(0, left.length - 1).concat(right);
+  } else {
+    return [pts[0], pts[end]];
+  }
+}
+function pointLineDist(p, a, b) {
+  const num = Math.abs((b.y - a.y) * p.x - (b.x - a.x) * p.y + b.x * a.y - b.y * a.x);
+  const den = Math.hypot(b.y - a.y, b.x - a.x);
+  return den === 0 ? Math.hypot(p.x - a.x, p.y - a.y) : num / den;
+}
+export function pointsToBezier(pts){
+  if(pts.length < 2) return pts;
+  if(pts.length === 2) return [pts[0], {x:(pts[0].x+pts[1].x)/2, y:(pts[0].y+pts[1].y)/2}, pts[1]];
+  const nodes = [pts[0]];
+  for(let i=1; i<pts.length-1; i++){
+    nodes.push(pts[i]); // Control point
+    if (i < pts.length - 2) {
+      nodes.push({x: (pts[i].x + pts[i+1].x)/2, y: (pts[i].y + pts[i+1].y)/2}); // On-curve anchor
+    }
+  }
+  nodes.push(pts[pts.length-1]);
+  return nodes;
+}
 
 // ════════════════════════════════════════════════════════════
 //  Intersection Detection
@@ -81,16 +144,16 @@ export function lineLine(p1,p2,p3,p4){
 export function findIntersections(){
   const spans=[];
   for(const c of State.curves){
-    if(c.nodes.length < 3) continue;
+    if(c.nodes.length < 3 && c.type !== 'freehand') continue;
     spans.push({cid:c.id, pts:discSpan(c, DISC_N)});
   }
   const res=[];
   for(let a=0;a<spans.length;a++){
-    for(let b=a+1;b<spans.length;b++){
+    for(let b=a;b<spans.length;b++){
       const sa=spans[a],sb=spans[b];
-      if(sa.cid===sb.cid) continue; 
       for(let i=0;i<DISC_N;i++){
-        for(let j=0;j<DISC_N;j++){
+        const jStart = (sa.cid===sb.cid) ? i + 5 : 0;
+        for(let j=jStart;j<DISC_N;j++){
           const ix=lineLine(sa.pts[i],sa.pts[i+1],sb.pts[j],sb.pts[j+1]);
           if(!ix) continue;
           const gtA=(i+ix.tA)/DISC_N;
@@ -128,7 +191,7 @@ export function curveSplits(cid){
 export function buildSegments(){
   const res=[]; let sid=0;
   for(const c of State.curves){
-    if(c.nodes.length < 3) continue;
+    if(c.nodes.length < 3 && c.type !== 'freehand') continue;
     const uniq=curveSplits(c.id);
     for(let i=0;i+1<uniq.length;i++){
       const tS=uniq[i],tE=uniq[i+1];

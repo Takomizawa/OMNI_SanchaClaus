@@ -136,6 +136,29 @@ def halt():
     motor.stop(PORT_Y)
 
 
+def move_local(dx, dy, speed=100):
+    # Move a relative distance (dx: right mm, dy: forward mm) in local frame
+    deg_x = int(dx * DPM_X * INV_X)
+    deg_y = int(dy * DPM_Y * INV_Y)
+    dist = math.sqrt(dx*dx + dy*dy)
+    if dist < 1: return
+    vx = int((deg_x / dist) * speed)
+    vy = int((deg_y / dist) * speed)
+
+    motor.reset_relative_position(PORT_X, 0)
+    motor.reset_relative_position(PORT_Y, 0)
+    motor.run(PORT_X, vx)
+    motor.run(PORT_Y, vy)
+
+    while True:
+        cx = abs(motor.relative_position(PORT_X))
+        cy = abs(motor.relative_position(PORT_Y))
+        if cx >= abs(deg_x) - 2 and cy >= abs(deg_y) - 2:
+            break
+        time.sleep_ms(10)
+    halt()
+
+
 def follow():
     odo = Odometry(START[0], START[1])
     vx = vy = 0.0

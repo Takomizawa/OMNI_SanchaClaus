@@ -32,6 +32,7 @@ export const State = {
   curveIdCtr: 0,
   activeCurveId: null,
   selNodeKey: null,
+  freehandPts: null,
 
   // Route (ordered list of items the robot will drive)
   //  { uid, kind:'seg'|'link', curveId, tS, tE, rev, speed(null=global), smooth, stopMs }

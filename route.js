@@ -25,7 +25,7 @@ function curveOf(it){ return State.curves.find(c => c.id === it.curveId); }
 
 export function segItemPts(it){
   const c = curveOf(it);
-  if(!c || c.nodes.length < 3) return null;
+  if(!c || (c.nodes.length < 3 && c.type !== 'freehand')) return null;
   return samplePiece(c, it.tS, it.tE, it.rev);
 }
 export function itemEnds(it){
@@ -107,7 +107,7 @@ export function remapRoute(){
 // returns pieces: {uid, kind, pts, item, implicit}
 export function routePieces(){
   const pieces = [];
-  let cursor = HOME;
+  let cursor = null;
   const R = State.route;
   for(let i = 0; i < R.length; i++){
     const it = R[i];
@@ -115,16 +115,20 @@ export function routePieces(){
       const nxt = R.slice(i + 1).find(x => x.kind === 'seg');
       const ne = nxt && itemEnds(nxt);
       if(!ne) continue;
-      pieces.push({ uid: it.uid, kind: 'link', item: it, pts: [cursor, ne.s] });
+      if(cursor) {
+        pieces.push({ uid: it.uid, kind: 'link', item: it, pts: [cursor, ne.s] });
+      }
       cursor = ne.s;
       continue;
     }
     const pts = segItemPts(it);
     if(!pts) continue;
-    const gap = dist(cursor, pts[0]);
-    if(gap > GAP_TOL){
-      // implicit straight bridge so the robot can physically get there
-      pieces.push({ uid: null, kind: 'gap', item: null, implicit: true, pts: [cursor, pts[0]] });
+    if(cursor) {
+      const gap = dist(cursor, pts[0]);
+      if(gap > GAP_TOL){
+        // implicit straight bridge so the robot can physically get there
+        pieces.push({ uid: null, kind: 'gap', item: null, implicit: true, pts: [cursor, pts[0]] });
+      }
     }
     pieces.push({ uid: it.uid, kind: 'seg', item: it, pts });
     cursor = pts[pts.length - 1];
