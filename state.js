@@ -9,14 +9,14 @@ export const State = {
   showObs: true,
 
   // Robot Preferences
-  prefPortX: 'A',
-  prefPortY: 'B',
+  prefPortX: 'B',
+  prefPortY: 'A',
   prefWheelX: 56.0,
   prefWheelY: 56.0,
   prefGearXm: 1, prefGearXw: 1,
   prefGearYm: 1, prefGearYw: 1,
-  prefCalibX: 1.000,
-  prefCalibY: 1.000,
+  prefCalibX: 1.0256,
+  prefCalibY: 1.0256,
   prefBacklash: 0,
   prefInvertX: false,
   prefInvertY: false,

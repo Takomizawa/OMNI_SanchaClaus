@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8"/>
@@ -20,7 +20,7 @@ window.addEventListener('unhandledrejection', function(e) {
   <span class="hdr-title" style="letter-spacing:1px;">GROUND STATION <span style="font-size:11px;color:var(--muted);font-weight:normal;">by Sancha-Claus Tech</span></span>
   <div class="hdr-sep"></div>
   <div class="hdr-badges">
-    <span class="hdr-badge">FLL Field (1143ﾃ・362)</span>
+    <span class="hdr-badge">FLL Field (1143×2362)</span>
     <span class="hdr-badge">+-Drive</span>
   </div>
   <div class="hdr-right">
@@ -31,7 +31,7 @@ window.addEventListener('unhandledrejection', function(e) {
 <div class="credits-overlay" id="credits-overlay">
   <div class="credits-box">
     <h3>Ground Station</h3>
-    <p>by <strong>Sancha-Claus Tech</strong><br>FLL Robot Path Planner<br>Quadratic Bﾃｩzier + Omni-wheel</p>
+    <p>by <strong>Sancha-Claus Tech</strong><br>FLL Robot Path Planner<br>Quadratic Bézier + Omni-wheel</p>
     <button id="btn-credits-close">Close</button>
   </div>
 </div>
@@ -101,8 +101,8 @@ window.addEventListener('unhandledrejection', function(e) {
         <span class="insp-val">ms</span>
       </div>
       <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; margin-top:6px;">
-        <button id="insp-up" title="Move earlier">笆ｲ</button>
-        <button id="insp-down" title="Move later">笆ｼ</button>
+        <button id="insp-up" title="Move earlier">▲</button>
+        <button id="insp-down" title="Move later">▼</button>
         <button id="insp-rev" title="Reverse direction">竍・/button>
         <button id="insp-del" title="Remove from route (Del)">笨・/button>
       </div>
@@ -136,8 +136,8 @@ window.addEventListener('unhandledrejection', function(e) {
     <div class="ctrl-section">
       <div class="ctrl-label" id="t-sim-lbl">Simulation</div>
       <div class="btn-row">
-        <button id="btn-sim-play">笆ｶ Play</button>
-        <button id="btn-sim-stop">笆 Stop</button>
+        <button id="btn-sim-play">▶ Play</button>
+        <button id="btn-sim-stop">⏹ Stop</button>
       </div>
       <div id="sim-progress-wrap"><div id="sim-progress-bar"></div></div>
     </div>
@@ -261,7 +261,7 @@ window.addEventListener('unhandledrejection', function(e) {
           <input type="number" id="pref-defspeed" class="modal-input" value="300" step="10" min="50">
         </div>
         <div class="modal-row">
-          <div class="modal-label">Max Acceleration [mm/sﾂｲ]</div>
+          <div class="modal-label">Max Acceleration [mm/s²]</div>
           <input type="number" id="pref-accel" class="modal-input" value="600" step="50" min="50">
         </div>
         <div class="modal-row">
