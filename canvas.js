@@ -1,5 +1,5 @@
 import { State } from './state.js';
-import { FIELD_W, FIELD_H, OFFSET_X, PIN_R, SNAP_MM, ROBOT_W, ROBOT_H, OBSTACLES, MISSIONS, bzAt, polyCollides, toLocal, toField } from './math.js';
+import { FIELD_W, FIELD_H, OFFSET_X, PIN_R, SNAP_MM, ROBOT_W, ROBOT_H, OBSTACLES, bzAt, polyCollides, toLocal, toField } from './math.js';
 import { routePieces, routeIndexOfSeg, routeTail, projectOnPlan, PIN_ON_TOL } from './route.js';
 
 export const MARGIN_MM = 1000;
@@ -94,9 +94,9 @@ export function getXY(e){
   return { cpx, cpy, rawX, rawY, snapX, snapY };
 }
 
-// ==========================================================
+// ════════════════════════════════════════════════════════════
 //  Draw
-// ==========================================================
+// ════════════════════════════════════════════════════════════
 export function draw(){
   const W=cw(), H=ch();
   ctx.clearRect(0,0,W,H);
@@ -119,13 +119,9 @@ export function draw(){
   ctx.restore();
 
   // Draw Origin Robot Icon
-  const pieces = routePieces();
-  const firstSeg = pieces.find(p => p.kind === 'seg');
-  const startPt = firstSeg ? firstSeg.pts[0] : {x:0, y:0};
-
   const rw = scalePx(ROBOT_W), rh = scalePx(ROBOT_H);
   ctx.save();
-  ctx.translate(toCx(startPt.x), toCy(startPt.y));
+  ctx.translate(toCx(0), toCy(0));
   ctx.rotate(heading * Math.PI / 180);
   ctx.fillStyle='rgba(238,130,124,0.15)';ctx.fillRect(-rw/2, -rh/2, rw, rh);
   ctx.strokeStyle='#ee827c';ctx.lineWidth=1;ctx.strokeRect(-rw/2, -rh/2, rw, rh);
@@ -210,22 +206,6 @@ function drawObstacles(){
     ctx.font='bold '+Math.max(9,cw()*0.022)+'px Courier New';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(obs.label,ox+ow/2,oy+oh/2);
-  }
-
-  // Draw FLL Missions
-  for(const m of MISSIONS) {
-    ctx.fillStyle='rgba(200,0,0,0.15)';
-    ctx.strokeStyle='rgba(200,0,0,0.50)';
-    ctx.lineWidth=1.5;
-    ctx.beginPath();
-    for(let i=0; i<m.pts.length; i++) {
-        const pt = m.pts[i];
-        if (i === 0) ctx.moveTo(toCx(pt.x), toCy(pt.y));
-        else ctx.lineTo(toCx(pt.x), toCy(pt.y));
-    }
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
   }
 }
 
@@ -360,15 +340,6 @@ function drawCV(){
     }
   }
 
-  if (State.freehandPts && State.freehandPts.length > 0) {
-    ctx.strokeStyle='#ee827c'; ctx.lineWidth=3; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(toCx(State.freehandPts[0].x), toCy(State.freehandPts[0].y));
-    for(let i=1; i<State.freehandPts.length; i++){
-      ctx.lineTo(toCx(State.freehandPts[i].x), toCy(State.freehandPts[i].y));
-    }
-    ctx.stroke();
-  }
-
   for(const c of State.curves){
     const isActive=c.id===State.activeCurveId || (focusItem && focusItem.curveId===c.id);
     const r=isActive?PIN_R:PIN_R*0.55;
@@ -400,7 +371,7 @@ function drawCV(){
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('×', cx, cy - 2);
+    ctx.fillText('★', cx, cy - 2);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
     ctx.fillStyle = off ? '#999' : '#993a35';
     ctx.font = 'bold 9px Courier New';

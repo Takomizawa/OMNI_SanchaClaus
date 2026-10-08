@@ -9,14 +9,14 @@ export const State = {
   showObs: true,
 
   // Robot Preferences
-  prefPortX: 'B',
-  prefPortY: 'A',
+  prefPortX: 'A',
+  prefPortY: 'B',
   prefWheelX: 56.0,
   prefWheelY: 56.0,
   prefGearXm: 1, prefGearXw: 1,
   prefGearYm: 1, prefGearYw: 1,
-  prefCalibX: 1.0256,
-  prefCalibY: 1.0256,
+  prefCalibX: 1.000,
+  prefCalibY: 1.000,
   prefBacklash: 0,
   prefInvertX: false,
   prefInvertY: false,
@@ -32,7 +32,6 @@ export const State = {
   curveIdCtr: 0,
   activeCurveId: null,
   selNodeKey: null,
-  freehandPts: null,
 
   // Route (ordered list of items the robot will drive)
   //  { uid, kind:'seg'|'link', curveId, tS, tE, rev, speed(null=global), smooth, stopMs }

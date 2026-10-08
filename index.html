@@ -44,10 +44,9 @@ window.addEventListener('unhandledrejection', function(e) {
     <div class="ctrl-section">
       <div class="ctrl-label" id="t-mode-lbl">Mode</div>
       <div class="btn-group" style="display:flex; padding:2px; border:1px solid var(--border); border-radius:var(--radius); background:var(--bg); gap:2px;">
-        <button class="mode-btn active" id="btn-mode-draw" data-mode="draw" style="flex:1; font-size: 11px;" title="Curve Pen (D)">Curve</button>
-        <button class="mode-btn" id="btn-mode-freehand" data-mode="freehand" style="flex:1; font-size: 11px;" title="Freehand (F)">Freehand</button>
-        <button class="mode-btn" id="btn-mode-select" data-mode="select" style="flex:1; font-size: 11px;" title="Select/Route (S)">Select</button>
-        <button class="mode-btn" id="btn-mode-action" data-mode="action" style="flex:1; font-size: 11px;" title="Actions (A)">Action</button>
+        <button class="mode-btn active" id="btn-mode-draw" data-mode="draw" style="flex:1;" title="Draw curves (D)">Draw</button>
+        <button class="mode-btn" id="btn-mode-select" data-mode="select" style="flex:1;" title="Build route (S)">Select</button>
+        <button class="mode-btn" id="btn-mode-action" data-mode="action" style="flex:1;" title="Place actions (A)">Action</button>
       </div>
     </div>
 
@@ -56,11 +55,9 @@ window.addEventListener('unhandledrejection', function(e) {
 
     <!-- Curve list -->
     <div id="sec-curves" class="ctrl-section">
-      <div class="ctrl-label" id="t-curves-lbl" style="display:flex; justify-content:space-between; align-items:center;">
-        <span>Curves</span>
-        <button id="btn-clear" title="Clear All" style="padding:2px 6px; font-size:9px; background:transparent; border:1px solid var(--border); cursor:pointer;">Clear</button>
-      </div>
+      <div class="ctrl-label" id="t-curves-lbl">Curves</div>
       <ul class="item-list" id="curve-list"></ul>
+      <button id="btn-new-curve" class="btn-accent" style="margin-top:6px;width:100%">+ New Curve</button>
     </div>
 
     <!-- Route list -->
@@ -70,8 +67,9 @@ window.addEventListener('unhandledrejection', function(e) {
         <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">—</span>
       </div>
       <ul class="item-list route-list" id="route-list"></ul>
-      <div class="btn-row" style="display:flex; gap:4px; margin-top:6px;">
-        <button id="btn-clear-route" style="flex:1" title="Remove all items from the route (curves stay)">Clear Route</button>
+      <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-top:6px;">
+        <button id="btn-autofix" title="Fix all route problems that can be fixed automatically">✚ Auto Fix</button>
+        <button id="btn-clear-route" title="Remove all items from the route (curves stay)">☐ Clear Route</button>
       </div>
     </div>
 
@@ -89,9 +87,8 @@ window.addEventListener('unhandledrejection', function(e) {
       </div>
       <label class="insp-row"><input type="checkbox" id="insp-speed-custom"><span>Custom speed</span></label>
       <div class="insp-slider" id="insp-speed-wrap">
-        <span style="font-size:10px;color:var(--muted)">Speed</span>
-        <input type="number" id="insp-speed" min="50" step="10" value="300" class="insp-num">
-        <span class="insp-val">mm/s</span>
+        <input type="range" id="insp-speed" min="50" max="800" step="10" value="300">
+        <span id="insp-speed-val" class="insp-val">300</span>
       </div>
       <label class="insp-row"><input type="checkbox" id="insp-ramp"><span>Accel / decel ramp</span></label>
       <label class="insp-row"><input type="checkbox" id="insp-stop"><span>Stop at end</span></label>
@@ -103,8 +100,8 @@ window.addEventListener('unhandledrejection', function(e) {
       <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; margin-top:6px;">
         <button id="insp-up" title="Move earlier">▲</button>
         <button id="insp-down" title="Move later">▼</button>
-        <button id="insp-rev" title="Reverse direction">⟲</button>
-        <button id="insp-del" title="Remove from route (Del)">🗑</button>
+        <button id="insp-rev" title="Reverse direction">⇄</button>
+        <button id="insp-del" title="Remove from route (Del)">✕</button>
       </div>
     </div>
 
@@ -114,19 +111,31 @@ window.addEventListener('unhandledrejection', function(e) {
       <ul class="item-list" id="action-list"></ul>
     </div>
 
-
+    <div class="ctrl-section">
+      <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <button id="btn-undo" title="Undo (Ctrl+Z)"><span style="font-size:13px;margin-right:4px;">↩</span><span id="t-undo">Undo</span></button>
+        <button id="btn-clear" title="Clear All"><span style="font-size:13px;margin-right:4px;">🗑</span><span id="t-clear">Clear</span></button>
+      </div>
+    </div>
 
     <div class="ctrl-section">
       <div class="ctrl-label">Robot Settings</div>
-      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359ﾂｰ):</div>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359°):</div>
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
         <input type="number" id="in-heading" value="0" min="0" max="359" style="flex:1; padding:4px; font-family:var(--sans); font-size:11px; border:1px solid var(--border); border-radius:3px;">
-        <span style="font-size:11px; color:var(--muted)">ﾂｰ</span>
+        <span style="font-size:11px; color:var(--muted)">°</span>
       </div>
       
-      <button id="btn-open-settings" style="width:100%; padding:6px; border:1px solid var(--border); background:var(--bg); border-radius:3px; cursor:pointer; font-size:11px; margin-top:5px;">Robot Preferences</button>
+      <button id="btn-open-settings" style="width:100%; padding:6px; border:1px solid var(--border); background:var(--bg); border-radius:3px; cursor:pointer; font-size:11px; margin-top:5px;">⚙️ Robot Preferences</button>
     </div>
 
+    <div class="ctrl-section">
+      <div class="ctrl-label" id="t-speed-lbl">Default Speed</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="range" id="sl-speed" min="50" max="800" value="300">
+        <span id="sl-speed-val" style="font-family:var(--mono);font-size:11px;white-space:nowrap">300 mm/s</span>
+      </div>
+    </div>
 
     <div class="ctrl-section">
       <label><input type="checkbox" id="chk-snap" checked><span id="t-snap">Snap 100 mm</span></label>
@@ -137,7 +146,7 @@ window.addEventListener('unhandledrejection', function(e) {
       <div class="ctrl-label" id="t-sim-lbl">Simulation</div>
       <div class="btn-row">
         <button id="btn-sim-play">▶ Play</button>
-        <button id="btn-sim-stop">⏹ Stop</button>
+        <button id="btn-sim-stop">■ Stop</button>
       </div>
       <div id="sim-progress-wrap"><div id="sim-progress-bar"></div></div>
     </div>
@@ -160,7 +169,18 @@ window.addEventListener('unhandledrejection', function(e) {
         </div>
       </div>
     </div>
-
+    <div id="compass-rose" style="position:absolute; bottom:20px; right:64px; width:45px; height:45px; z-index:10; pointer-events:none; opacity:0.7; display:flex; align-items:center; justify-content:center;">
+      <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <text x="50" y="20" font-size="22" text-anchor="middle" fill="#777" font-family="sans-serif" font-weight="bold">N</text>
+        <path d="M 50 26 L 25 65 L 50 65 Z" fill="#777" />
+        <line x1="50" y1="26" x2="50" y2="85" stroke="#777" stroke-width="4" stroke-linecap="round" />
+        <line x1="23" y1="65" x2="77" y2="65" stroke="#777" stroke-width="4" stroke-linecap="round" />
+      </svg>
+    </div>
+    <div id="zoom-controls">
+      <button id="btn-zoom-in" title="Zoom In">+</button>
+      <button id="btn-zoom-out" title="Zoom Out">−</button>
+    </div>
   </section>
 
   <!-- RIGHT: Code -->
@@ -190,11 +210,11 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="modal-group-title">Port Assignments</div>
         <div class="modal-row">
           <div class="modal-label">Motor X (Left/Right) Port</div>
-          <input type="text" id="pref-port-x" class="modal-input-str" value="B" maxlength="1">
+          <input type="text" id="pref-port-x" class="modal-input-str" value="A" maxlength="1">
         </div>
         <div class="modal-row">
           <div class="modal-label">Motor Y (Forward/Back) Port</div>
-          <input type="text" id="pref-port-y" class="modal-input-str" value="A" maxlength="1">
+          <input type="text" id="pref-port-y" class="modal-input-str" value="B" maxlength="1">
         </div>
       </div>
 
@@ -230,11 +250,11 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="modal-group-title">Software Tuning (Calibration)</div>
         <div class="modal-row">
           <div class="modal-label">Calibration Multiplier (X)</div>
-          <input type="number" id="pref-calib-x" class="modal-input" value="1.0256" step="0.0001">
+          <input type="number" id="pref-calib-x" class="modal-input" value="1.000" step="0.001">
         </div>
         <div class="modal-row">
           <div class="modal-label">Calibration Multiplier (Y)</div>
-          <input type="number" id="pref-calib-y" class="modal-input" value="1.0256" step="0.0001">
+          <input type="number" id="pref-calib-y" class="modal-input" value="1.000" step="0.001">
         </div>
         <div class="modal-row">
           <div class="modal-label">Backlash Compensation [Degrees]</div>
@@ -257,10 +277,6 @@ window.addEventListener('unhandledrejection', function(e) {
       <div class="modal-group">
         <div class="modal-group-title">Motion Profile</div>
         <div class="modal-row">
-          <div class="modal-label">Default Target Speed [mm/s]</div>
-          <input type="number" id="pref-defspeed" class="modal-input" value="300" step="10" min="50">
-        </div>
-        <div class="modal-row">
           <div class="modal-label">Max Acceleration [mm/s²]</div>
           <input type="number" id="pref-accel" class="modal-input" value="600" step="50" min="50">
         </div>
@@ -275,7 +291,6 @@ window.addEventListener('unhandledrejection', function(e) {
 </div>
 
 <!-- ES Module Entry -->
-<script type="module" src="main.js"></script>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>
-

@@ -1,4 +1,4 @@
-ï»¿*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#f8f6f5;--panel:#fff;--border:#e0dcd9;--text:#222222;
   --muted:#888;--accent:#ee827c;--ok:#ee827c;--warn:#cc2200;
@@ -54,8 +54,8 @@ main{flex:1;display:grid;grid-template-columns:220px 1fr 280px;overflow:hidden;m
 .mode-btn{flex:1;padding:5px 0;font-size:11px;font-family:var(--sans);
   background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
   cursor:pointer;color:var(--muted);transition:all .15s}
-.mode-btn.active{opacity:1;transform:scale(1.05);box-shadow:0 6px 16px rgba(238,130,124,0.6);}
-.mode-btn:hover:not(.active){opacity:0.85;transform:scale(1.05);}
+.mode-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.mode-btn:hover:not(.active){border-color:#999;color:var(--text)}
 
 /* State indicator */
 .state-pill{
@@ -127,7 +127,7 @@ canvas { display:block; cursor:crosshair; touch-action:none; border-radius:4px; 
   background:rgba(34,34,34,.85);color:#fff;padding:3px 8px;border-radius:3px;
   pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;white-space:nowrap}
 .tooltip.show{opacity:1}
-/* ï¿½ï¿½ï¿½ï¿½ Modal ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
+/* „Ÿ„Ÿ Modal „Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ */
 #settings-modal-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.5); z-index: 1000;

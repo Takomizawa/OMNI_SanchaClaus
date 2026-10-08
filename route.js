@@ -1,7 +1,7 @@
-// ==========================================================
+// ════════════════════════════════════════════════════════════
 //  Route: ordered list of curve pieces the robot drives,
 //  validation / auto-repair, and the motion (speed) profile.
-// ==========================================================
+// ════════════════════════════════════════════════════════════
 import { State } from './state.js';
 import { samplePiece, polyLen, polyCollides, MATCH_TOL } from './math.js';
 
@@ -25,7 +25,7 @@ function curveOf(it){ return State.curves.find(c => c.id === it.curveId); }
 
 export function segItemPts(it){
   const c = curveOf(it);
-  if(!c || (c.nodes.length < 3 && c.type !== 'freehand')) return null;
+  if(!c || c.nodes.length < 3) return null;
   return samplePiece(c, it.tS, it.tE, it.rev);
 }
 export function itemEnds(it){
@@ -107,7 +107,7 @@ export function remapRoute(){
 // returns pieces: {uid, kind, pts, item, implicit}
 export function routePieces(){
   const pieces = [];
-  let cursor = null;
+  let cursor = HOME;
   const R = State.route;
   for(let i = 0; i < R.length; i++){
     const it = R[i];
@@ -115,20 +115,16 @@ export function routePieces(){
       const nxt = R.slice(i + 1).find(x => x.kind === 'seg');
       const ne = nxt && itemEnds(nxt);
       if(!ne) continue;
-      if(cursor) {
-        pieces.push({ uid: it.uid, kind: 'link', item: it, pts: [cursor, ne.s] });
-      }
+      pieces.push({ uid: it.uid, kind: 'link', item: it, pts: [cursor, ne.s] });
       cursor = ne.s;
       continue;
     }
     const pts = segItemPts(it);
     if(!pts) continue;
-    if(cursor) {
-      const gap = dist(cursor, pts[0]);
-      if(gap > GAP_TOL){
-        // implicit straight bridge so the robot can physically get there
-        pieces.push({ uid: null, kind: 'gap', item: null, implicit: true, pts: [cursor, pts[0]] });
-      }
+    const gap = dist(cursor, pts[0]);
+    if(gap > GAP_TOL){
+      // implicit straight bridge so the robot can physically get there
+      pieces.push({ uid: null, kind: 'gap', item: null, implicit: true, pts: [cursor, pts[0]] });
     }
     pieces.push({ uid: it.uid, kind: 'seg', item: it, pts });
     cursor = pts[pts.length - 1];
@@ -174,7 +170,7 @@ export function validateRoute(){
           ? `Route starts ${Math.round(gap)} mm away from robot home`
           : `${Math.round(gap)} mm jump between ${cursorLabel} and #${i + 1}`;
         if(j > 0){
-          issues.push({ level: 'err', idx, msg: msg + ` ⚠️ #${j + 1} connects here`,
+          issues.push({ level: 'err', idx, msg: msg + ` — #${j + 1} connects here`,
             fix: { label: `Move #${j + 1} here`, fn: () => {
               const [mv] = R.splice(j, 1);
               const e = itemEnds(mv);
@@ -198,7 +194,13 @@ export function validateRoute(){
     });
   }
 
-  // `Action 📍{k + 1} is ${pr ? Math.round(pr.d) + ' mm' : ''} off the route`,
+  // action pins far from the route
+  const plan = State.plan;
+  State.actionPins.forEach((p, k) => {
+    const pr = plan ? projectOnPlan(plan, p) : null;
+    if(!pr || pr.d > PIN_ON_TOL){
+      issues.push({ level: 'warn', idx: -1, pin: k,
+        msg: `Action ★${k + 1} is ${pr ? Math.round(pr.d) + ' mm' : ''} off the route`,
         fix: pr ? { label: 'Snap onto route', fn: () => { State.actionPins[k] = { ...State.actionPins[k], x: pr.x, y: pr.y }; } } : null });
     }
   });

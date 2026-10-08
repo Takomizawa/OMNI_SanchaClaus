@@ -23,7 +23,7 @@ export function generateCode(){
       if(p.action){ mode = 2; arg = p.action; }
       else if(isStop || isLast){ mode = 1; arg = p.stopMs > 1 ? Math.round(p.stopMs) : 0; }
       rows.push(`    (${Math.round(p.x)}, ${Math.round(p.y)}, ${Math.round(p.v)}, ${mode}, ${arg}),`
-        + (mode === 2 ? `  # ⚙️${arg}` : mode === 1 && arg ? `  # pause ${arg} ms` : ''));
+        + (mode === 2 ? `  # ★${arg}` : mode === 1 && arg ? `  # pause ${arg} ms` : ''));
     }
   }
 
@@ -47,7 +47,7 @@ import motor
 import time
 import math
 
-# ⚙️ Robot preferences (from Ground Station) ⚙️
+# ── Robot preferences (from Ground Station) ──────────────
 PORT_X = port.${State.prefPortX.toUpperCase()}      # motor that moves the robot left/right
 PORT_Y = port.${State.prefPortY.toUpperCase()}      # motor that moves the robot forward/back
 DPM_X = ${dpm.x.toFixed(4)}   # motor degrees per mm (wheel, gear, calibration)
@@ -59,7 +59,7 @@ HEADING = ${State.robotHeading | 0}        # robot facing on the field (deg, clo
 USE_GYRO = ${State.prefUseGyro ? 'True' : 'False'}
 GYRO_SIGN = -1     # SPIKE yaw is +counter-clockwise; flip to 1 if correction goes the wrong way
 
-# ⚙️ Tuning ⚙️
+# ── Tuning ───────────────────────────────────────────────
 ACCEL = ${Math.round(State.prefAccel)}        # mm/s^2  max change of commanded speed
 MAX_DEG_S = ${MOTOR_MAX_DEG_S}    # motor speed limit
 LOOKAHEAD = 25     # mm  pass-through points are skipped inside this radius
@@ -134,29 +134,6 @@ def drive(vx, vy, h):
 def halt():
     motor.stop(PORT_X)
     motor.stop(PORT_Y)
-
-
-def move_local(dx, dy, speed=100):
-    # Move a relative distance (dx: right mm, dy: forward mm) in local frame
-    deg_x = int(dx * DPM_X * INV_X)
-    deg_y = int(dy * DPM_Y * INV_Y)
-    dist = math.sqrt(dx*dx + dy*dy)
-    if dist < 1: return
-    vx = int((deg_x / dist) * speed)
-    vy = int((deg_y / dist) * speed)
-
-    motor.reset_relative_position(PORT_X, 0)
-    motor.reset_relative_position(PORT_Y, 0)
-    motor.run(PORT_X, vx)
-    motor.run(PORT_Y, vy)
-
-    while True:
-        cx = abs(motor.relative_position(PORT_X))
-        cy = abs(motor.relative_position(PORT_Y))
-        if cx >= abs(deg_x) - 2 and cy >= abs(deg_y) - 2:
-            break
-        time.sleep_ms(10)
-    halt()
 
 
 def follow():
