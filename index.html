@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8"/>
@@ -20,7 +20,7 @@ window.addEventListener('unhandledrejection', function(e) {
   <span class="hdr-title" style="letter-spacing:1px;">GROUND STATION <span style="font-size:11px;color:var(--muted);font-weight:normal;">by Sancha-Claus Tech</span></span>
   <div class="hdr-sep"></div>
   <div class="hdr-badges">
-    <span class="hdr-badge">FLL Field (1143×2362)</span>
+    <span class="hdr-badge">FLL Field (1143ﾃ・362)</span>
     <span class="hdr-badge">+-Drive</span>
   </div>
   <div class="hdr-right">
@@ -31,7 +31,7 @@ window.addEventListener('unhandledrejection', function(e) {
 <div class="credits-overlay" id="credits-overlay">
   <div class="credits-box">
     <h3>Ground Station</h3>
-    <p>by <strong>Sancha-Claus Tech</strong><br>FLL Robot Path Planner<br>Quadratic Bézier + Omni-wheel</p>
+    <p>by <strong>Sancha-Claus Tech</strong><br>FLL Robot Path Planner<br>Quadratic Bﾃｩzier + Omni-wheel</p>
     <button id="btn-credits-close">Close</button>
   </div>
 </div>
@@ -67,7 +67,7 @@ window.addEventListener('unhandledrejection', function(e) {
     <div id="sec-route" class="ctrl-section">
       <div class="ctrl-label" style="display:flex;align-items:center">
         <span id="t-route-lbl">Route</span>
-        <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">—</span>
+        <span class="route-info" id="route-info" style="margin-left:auto;text-transform:none;letter-spacing:0">窶・/span>
       </div>
       <ul class="item-list route-list" id="route-list"></ul>
       <div class="btn-row" style="display:flex; gap:4px; margin-top:6px;">
@@ -101,10 +101,10 @@ window.addEventListener('unhandledrejection', function(e) {
         <span class="insp-val">ms</span>
       </div>
       <div class="btn-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:4px; margin-top:6px;">
-        <button id="insp-up" title="Move earlier">▲</button>
-        <button id="insp-down" title="Move later">▼</button>
-        <button id="insp-rev" title="Reverse direction">⇄</button>
-        <button id="insp-del" title="Remove from route (Del)">✕</button>
+        <button id="insp-up" title="Move earlier">笆ｲ</button>
+        <button id="insp-down" title="Move later">笆ｼ</button>
+        <button id="insp-rev" title="Reverse direction">竍・/button>
+        <button id="insp-del" title="Remove from route (Del)">笨・/button>
       </div>
     </div>
 
@@ -118,10 +118,10 @@ window.addEventListener('unhandledrejection', function(e) {
 
     <div class="ctrl-section">
       <div class="ctrl-label">Robot Settings</div>
-      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359°):</div>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--muted)">Facing Direction (0-359ﾂｰ):</div>
       <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
         <input type="number" id="in-heading" value="0" min="0" max="359" style="flex:1; padding:4px; font-family:var(--sans); font-size:11px; border:1px solid var(--border); border-radius:3px;">
-        <span style="font-size:11px; color:var(--muted)">°</span>
+        <span style="font-size:11px; color:var(--muted)">ﾂｰ</span>
       </div>
       
       <button id="btn-open-settings" style="width:100%; padding:6px; border:1px solid var(--border); background:var(--bg); border-radius:3px; cursor:pointer; font-size:11px; margin-top:5px;">Robot Preferences</button>
@@ -136,8 +136,8 @@ window.addEventListener('unhandledrejection', function(e) {
     <div class="ctrl-section">
       <div class="ctrl-label" id="t-sim-lbl">Simulation</div>
       <div class="btn-row">
-        <button id="btn-sim-play">▶ Play</button>
-        <button id="btn-sim-stop">■ Stop</button>
+        <button id="btn-sim-play">笆ｶ Play</button>
+        <button id="btn-sim-stop">笆 Stop</button>
       </div>
       <div id="sim-progress-wrap"><div id="sim-progress-bar"></div></div>
     </div>
@@ -145,7 +145,7 @@ window.addEventListener('unhandledrejection', function(e) {
     <div id="status-bar">
       <span id="status-dot" class="ok"></span>
       <span id="status-text">Ready</span>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted)" id="path-dist">—</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted)" id="path-dist">窶・/span>
     </div>
   </aside>
 
@@ -181,8 +181,8 @@ window.addEventListener('unhandledrejection', function(e) {
 <div id="settings-modal-overlay">
   <div id="settings-modal">
     <div class="modal-header">
-      <div class="modal-title">⚙️ Robot Preferences (2-Motor Omni)</div>
-      <button class="modal-close" id="btn-close-modal">×</button>
+      <div class="modal-title">笞呻ｸ・Robot Preferences (2-Motor Omni)</div>
+      <button class="modal-close" id="btn-close-modal">ﾃ・/button>
     </div>
     <div class="modal-body">
       
@@ -261,7 +261,7 @@ window.addEventListener('unhandledrejection', function(e) {
           <input type="number" id="pref-defspeed" class="modal-input" value="300" step="10" min="50">
         </div>
         <div class="modal-row">
-          <div class="modal-label">Max Acceleration [mm/s²]</div>
+          <div class="modal-label">Max Acceleration [mm/sﾂｲ]</div>
           <input type="number" id="pref-accel" class="modal-input" value="600" step="50" min="50">
         </div>
         <div class="modal-row">
@@ -278,3 +278,4 @@ window.addEventListener('unhandledrejection', function(e) {
 <script type="module" src="main.js"></script>
 </body>
 </html>
+

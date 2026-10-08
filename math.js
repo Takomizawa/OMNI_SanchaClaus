@@ -1,15 +1,15 @@
-import { State } from './state.js';
+﻿import { State } from './state.js';
 
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 //  Constants
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 export const FIELD_W    = 2362;
 export const FIELD_H    = 1143;
 export const OFFSET_X   = 181;
 export const PIN_R      = 7;
 export const SNAP_MM    = 100;
-export const ROBOT_W    = 200;
-export const ROBOT_H    = 200;
+export const ROBOT_W    = 180;
+export const ROBOT_H    = 180;
 export const SEG_HIT    = 16;
 export const NODE_HIT   = 10;
 export const DISC_N     = 60;
@@ -30,9 +30,9 @@ for (const m of MISSIONS) {
   OBSTACLES.push(m.aabb);
 }
 
-// ════════════════════════════════════════════════════════════
-//  Bézier Math  (nodes = [start, end, control])
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
+//  Bﾃｩzier Math  (nodes = [start, end, control])
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 export function bzAt(p1, p2, cp, t){
   const m = 1 - t;
   return {
@@ -125,9 +125,9 @@ export function pointsToBezier(pts){
   return nodes;
 }
 
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 //  Intersection Detection
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 export function lineLine(p1,p2,p3,p4){
   const d1x=p2.x-p1.x,d1y=p2.y-p1.y;
   const d2x=p4.x-p3.x,d2y=p4.y-p3.y;
@@ -170,9 +170,9 @@ export function findIntersections(){
   return res;
 }
 
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 //  Segment Building  (curves are split at intersections)
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 export function curveSplits(cid){
   const splits=[0, 1];
   for(const ix of State.ixPoints){
@@ -208,9 +208,9 @@ export function rebuildSegmentsAndIntersections(){
   State.hoverSegId = null;
 }
 
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 //  Collision
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 export function segRectIx(ax,ay,bx,by,rx,ry,rw,rh){
   if(ax>rx&&ax<rx+rw&&ay>ry&&ay<ry+rh) return true;
   if(bx>rx&&bx<rx+rw&&by>ry&&by<ry+rh) return true;
@@ -234,11 +234,11 @@ export function polyCollides(pts){
   return false;
 }
 
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 //  Robot frame helpers
 //  heading H (deg, clockwise on screen).  Robot forward = (sinH, cosH),
 //  robot right = (cosH, -sinH) in field coordinates.
-// ════════════════════════════════════════════════════════════
+// 笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武笊絶武
 export function toLocal(dx, dy, headingDeg){
   const A = headingDeg * Math.PI / 180, c = Math.cos(A), s = Math.sin(A);
   return { x: dx*c - dy*s, y: dx*s + dy*c };   // x = right, y = forward
@@ -257,3 +257,4 @@ export function degPerMm(){
   };
 }
 export const MOTOR_MAX_DEG_S = 1000;   // conservative SPIKE motor limit
+
