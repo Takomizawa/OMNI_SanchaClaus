@@ -7,9 +7,9 @@ import { appendSeg, remapRoute, buildPlan, validateRoute, autoFixAll, routeIndex
          segItemPts, routePieces, newLinkItem, projectOnPlan, PIN_ON_TOL } from './route.js';
 initCanvas();
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Hit Testing
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 function hitAnyNode(cpx,cpy,onlyCurveIds){
   for(let ci=State.curves.length-1;ci>=0;ci--){
     const c=State.curves[ci];
@@ -75,9 +75,9 @@ function findClosestPathPoint(cpx, cpy) {
 const focusedItem = () => State.route.find(it=>it.uid===State.focusUid) || null;
 const focusedIdx  = () => State.route.findIndex(it=>it.uid===State.focusUid);
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Mouse + Key Events
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 const tooltip = document.getElementById('tooltip');
 
 function updateZoom(newZ) {
@@ -402,9 +402,9 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Curve / Route Management
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 function finalizeCurve(){
   if(State.activeCurveId===null) return;
   const c=State.curves.find(c=>c.id===State.activeCurveId);
@@ -447,14 +447,14 @@ function flashStatus(msg){
   statusFlashTimer=setTimeout(updateStatus,2200);
 }
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  UI Updates
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 function updateStatePill(){
   const pill=document.getElementById('state-pill');
   if(State.mode==='action'){
     pill.className='state-pill selecting';
-    pill.innerHTML='Click the route to place an Action (★)<br>Drag ★ to adjust · Right-click to delete';
+    pill.innerHTML='Click the route to place an Action (📍)<br>Drag ↕ to adjust ・ Right-click to delete';
     return;
   }
   if(State.mode==='draw'){
@@ -465,7 +465,7 @@ function updateStatePill(){
     pill.innerHTML='Click and drag to draw a continuous freehand path.<br>It will be smoothed automatically.';
   }else{
     pill.className='state-pill selecting';
-    pill.innerHTML='Click curves in driving order to build the route<br>Shift/right-click: remove · Drag rows to reorder';
+    pill.innerHTML='Click curves in driving order to build the route<br>Shift/right-click: remove 🗑 ・ Drag rows to reorder';
   }
 }
 
@@ -473,7 +473,7 @@ function curveLabel(it){
   const ci=State.curves.findIndex(c=>c.id===it.curveId);
   const parts=State.segments.filter(s=>s.curveId===it.curveId).sort((a,b)=>a.tS-b.tS);
   const k=parts.findIndex(s=>Math.abs(s.tS-it.tS)<1e-6);
-  return 'C'+(ci+1)+(parts.length>1?'·'+(k+1)+'/'+parts.length:'')+(it.rev?' ←':' →');
+  return 'C'+(ci+1)+(parts.length>1?'・'+(k+1)+'/'+parts.length:'')+(it.rev?' ⟲':' ▶');
 }
 function itemLength(it, idx){
   if(it.kind==='seg'){ const p=segItemPts(it); return p?polyLen(p):0; }
@@ -500,9 +500,7 @@ function updateRouteList(issues){
     li.className=(it.uid===State.focusUid?'focus ':'')+(bad.has(i)?'bad ':'')+(it.kind==='link'?'link':'');
     const name = it.kind==='link' ? 'Link (straight)' : curveLabel(it);
     const tags = (it.speed?`<span class="rt-tag spd">${it.speed}</span>`:'')
-      + (it.ramp===false?'<span class="rt-tag">no ramp</span>':'')
-      + (it.stop?`<span class="rt-tag">■${it.pauseMs?it.pauseMs+'ms':''}</span>`:'');
-    li.innerHTML=`<span class="grip">⋮⋮</span><span class="item-idx">${i+1}</span>`
+      + (it.ramp===false?'<span class="rt-tag">⏹${i+1}</span>`
       +`<span class="rt-name">${name} <span style="color:#aaa">${Math.round(itemLength(it,i))}</span></span>${tags}`
       +`<span class="item-del" title="Remove">&#215;</span>`;
     li.addEventListener('click',e=>{
@@ -524,7 +522,7 @@ function updateRouteList(issues){
   const plan=State.plan;
   if(plan && plan.pts.length>1){
     const col=State.showObs && polyCollides(plan.pts);
-    const txt=`${Math.round(plan.total)} mm · ${(plan.time/1000).toFixed(1)} s`;
+    const txt=`${Math.round(plan.total)} mm ・ {(plan.time/1000).toFixed(1)} s`;
     ri.innerHTML=col?'<span class="wo">'+txt+'</span>':'<span class="hi">'+txt+'</span>';
   } else ri.textContent='—';
 }
@@ -622,7 +620,7 @@ function updateCurveList(){
     const li=document.createElement('li');
     li.className=c.id===State.activeCurveId?'cur':'';
     li.innerHTML='<span class="item-idx">'+(ci+1)+'</span>'
-      +'<span>C'+(ci+1)+' · '+(c.type === 'freehand' ? 'freehand' : (c.nodes.length<3?c.nodes.length+'/3 nodes':'curve'))+(used?' <span style="color:var(--ok)">●</span>':'')+'</span>'
+      +'<span>C'+(ci+1)+' · '+(c.type === 'freehand' ? 'freehand' : (c.nodes.length<3?c.nodes.length+'/3 nodes':'curve'))+(used?' <span style="color:var(--ok)">✓</span>':'')+'</span>'
       +'<span class="item-del" data-id="'+c.id+'">&#215;</span>';
     li.style.cursor='pointer';
     li.addEventListener('click',e=>{
@@ -651,7 +649,7 @@ function updateActionList(){
     const pr=State.plan&&State.plan.pts.length?projectOnPlan(State.plan,pin):null;
     const off=!pr||pr.d>PIN_ON_TOL;
     const li=document.createElement('li');
-    li.innerHTML='<span class="item-idx">'+(i+1)+'</span><span>★ ('+Math.round(pin.x)+', '+Math.round(pin.y)+')'
+    li.innerHTML='<span class="item-idx">'+(i+1)+'</span><span>📍 (''+Math.round(pin.x)+', '+Math.round(pin.y)+')'
       +(off?' <span style="color:var(--warn)">off route</span>':'')+'</span>'
       +'<span class="item-del" data-idx="'+i+'">&#215;</span>';
     list.appendChild(li);
@@ -709,9 +707,9 @@ function switchMode(m){
   refresh();
 }
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Controls Binding
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 document.querySelectorAll('.mode-btn').forEach(btn=>
   btn.addEventListener('click',()=>switchMode(btn.dataset.mode)));
 
@@ -851,9 +849,9 @@ document.getElementById('credits-overlay').addEventListener('click',e=>{
   if(e.target===e.currentTarget) e.currentTarget.classList.remove('show');
 });
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Init
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 window.addEventListener('resize',()=>{
   clearTimeout(window._resizeTimer);
   window._resizeTimer = setTimeout(() => resizeCanvas(document.getElementById('pane-field'), draw), 50);

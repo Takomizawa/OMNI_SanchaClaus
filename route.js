@@ -1,7 +1,7 @@
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Route: ordered list of curve pieces the robot drives,
 //  validation / auto-repair, and the motion (speed) profile.
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 import { State } from './state.js';
 import { samplePiece, polyLen, polyCollides, MATCH_TOL } from './math.js';
 
@@ -174,7 +174,7 @@ export function validateRoute(){
           ? `Route starts ${Math.round(gap)} mm away from robot home`
           : `${Math.round(gap)} mm jump between ${cursorLabel} and #${i + 1}`;
         if(j > 0){
-          issues.push({ level: 'err', idx, msg: msg + ` — #${j + 1} connects here`,
+          issues.push({ level: 'err', idx, msg: msg + ` ⚠️ #${j + 1} connects here`,
             fix: { label: `Move #${j + 1} here`, fn: () => {
               const [mv] = R.splice(j, 1);
               const e = itemEnds(mv);
@@ -198,13 +198,7 @@ export function validateRoute(){
     });
   }
 
-  // action pins far from the route
-  const plan = State.plan;
-  State.actionPins.forEach((p, k) => {
-    const pr = plan ? projectOnPlan(plan, p) : null;
-    if(!pr || pr.d > PIN_ON_TOL){
-      issues.push({ level: 'warn', idx: -1, pin: k,
-        msg: `Action ★${k + 1} is ${pr ? Math.round(pr.d) + ' mm' : ''} off the route`,
+  // `Action 📍{k + 1} is ${pr ? Math.round(pr.d) + ' mm' : ''} off the route`,
         fix: pr ? { label: 'Snap onto route', fn: () => { State.actionPins[k] = { ...State.actionPins[k], x: pr.x, y: pr.y }; } } : null });
     }
   });

@@ -23,7 +23,7 @@ export function generateCode(){
       if(p.action){ mode = 2; arg = p.action; }
       else if(isStop || isLast){ mode = 1; arg = p.stopMs > 1 ? Math.round(p.stopMs) : 0; }
       rows.push(`    (${Math.round(p.x)}, ${Math.round(p.y)}, ${Math.round(p.v)}, ${mode}, ${arg}),`
-        + (mode === 2 ? `  # ★${arg}` : mode === 1 && arg ? `  # pause ${arg} ms` : ''));
+        + (mode === 2 ? `  # ⚙️${arg}` : mode === 1 && arg ? `  # pause ${arg} ms` : ''));
     }
   }
 
@@ -47,7 +47,7 @@ import motor
 import time
 import math
 
-# ── Robot preferences (from Ground Station) ──────────────
+# ⚙️ Robot preferences (from Ground Station) ⚙️
 PORT_X = port.${State.prefPortX.toUpperCase()}      # motor that moves the robot left/right
 PORT_Y = port.${State.prefPortY.toUpperCase()}      # motor that moves the robot forward/back
 DPM_X = ${dpm.x.toFixed(4)}   # motor degrees per mm (wheel, gear, calibration)
@@ -59,7 +59,7 @@ HEADING = ${State.robotHeading | 0}        # robot facing on the field (deg, clo
 USE_GYRO = ${State.prefUseGyro ? 'True' : 'False'}
 GYRO_SIGN = -1     # SPIKE yaw is +counter-clockwise; flip to 1 if correction goes the wrong way
 
-# ── Tuning ───────────────────────────────────────────────
+# ⚙️ Tuning ⚙️
 ACCEL = ${Math.round(State.prefAccel)}        # mm/s^2  max change of commanded speed
 MAX_DEG_S = ${MOTOR_MAX_DEG_S}    # motor speed limit
 LOOKAHEAD = 25     # mm  pass-through points are skipped inside this radius

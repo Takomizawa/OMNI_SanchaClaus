@@ -94,9 +94,9 @@ export function getXY(e){
   return { cpx, cpy, rawX, rawY, snapX, snapY };
 }
 
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 //  Draw
-// ════════════════════════════════════════════════════════════
+// ==========================================================
 export function draw(){
   const W=cw(), H=ch();
   ctx.clearRect(0,0,W,H);
@@ -400,7 +400,7 @@ function drawCV(){
     ctx.font = 'bold 20px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('★', cx, cy - 2);
+    ctx.fillText('×', cx, cy - 2);
     ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
     ctx.fillStyle = off ? '#999' : '#993a35';
     ctx.font = 'bold 9px Courier New';
